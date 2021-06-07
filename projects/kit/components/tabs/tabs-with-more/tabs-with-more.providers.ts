@@ -6,7 +6,7 @@ import {
 } from '@ng-web-apis/mutation-observer';
 import {TuiDestroyService, TuiResizeService} from '@taiga-ui/cdk';
 import {merge, Observable} from 'rxjs';
-import {filter, startWith, takeUntil, tap} from 'rxjs/operators';
+import {debounceTime, filter, startWith, takeUntil, tap} from 'rxjs/operators';
 
 export function tabsRefreshFactory(
     resize$: Observable<unknown>,
@@ -22,11 +22,17 @@ export function tabsRefreshFactory(
     ).pipe(
         // Ignoring cases when host is detached from DOM
         filter(() => body.contains(nativeElement)),
+        debounceTime(0),
         startWith(null),
         takeUntil(destroy$),
     );
 }
 
+// TODO: remove in ivy compilation
+export const MUTATION_CONFIG = {
+    childList: true,
+    subtree: true,
+};
 export const TABS_REFRESH = new InjectionToken<Observable<unknown>>('Refresh stream');
 export const TABS_PROVIDERS: Provider[] = [
     TuiResizeService,
@@ -34,10 +40,7 @@ export const TABS_PROVIDERS: Provider[] = [
     MutationObserverService,
     {
         provide: MUTATION_OBSERVER_INIT,
-        useValue: {
-            childList: true,
-            subtree: true,
-        },
+        useValue: MUTATION_CONFIG,
     },
     {
         provide: TABS_REFRESH,

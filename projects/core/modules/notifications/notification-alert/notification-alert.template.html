@@ -1,7 +1,8 @@
 <tui-notification
-    *ngIf="hasCloseButton else noClose"
-    [status]="status"
-    (close)="closeDialog()"
+    *ngIf="safeItem.hasCloseButton else noClose"
+    [status]="safeItem.status"
+    [hasIcon]="safeItem.hasIcon"
+    (close)="closeNotification()"
 >
     <label
         *ngIf="safeItem.label"
@@ -19,7 +20,7 @@
     ></div>
 </tui-notification>
 <ng-template #noClose>
-    <tui-notification [status]="status">
+    <tui-notification [status]="safeItem.status" [hasIcon]="safeItem.hasIcon">
         <label
             *ngIf="safeItem.label"
             automation-id="tui-notification-alert__heading"

@@ -5,17 +5,20 @@ import {
     Inject,
     Input,
 } from '@angular/core';
-import {tuiDefaultProp, TuiDestroyService} from '@taiga-ui/cdk';
+import {isNumber, tuiDefaultProp} from '@taiga-ui/cdk';
 import {MODE_PROVIDER, TUI_MODE, TuiBrightness, TuiSizeL, TuiSizeS} from '@taiga-ui/core';
-import {TuiStatus} from '@taiga-ui/kit/enums';
+import {TuiStatusT} from '@taiga-ui/kit/types';
 import {Observable} from 'rxjs';
 
 @Component({
     selector: 'tui-badge',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    template: '{{outputValue}}',
+    templateUrl: './badge.template.html',
     styleUrls: ['./badge.style.less'],
-    providers: [TuiDestroyService, MODE_PROVIDER],
+    providers: [MODE_PROVIDER],
+    host: {
+        '($.data-mode.attr)': 'mode$',
+    },
 })
 export class TuiBadgeComponent {
     @Input()
@@ -30,32 +33,34 @@ export class TuiBadgeComponent {
     @Input()
     @HostBinding('attr.data-tui-host-status')
     @tuiDefaultProp()
-    status: TuiStatus = TuiStatus.Default;
+    status: TuiStatusT = 'default';
 
     @Input()
     @HostBinding('class._hoverable')
     @tuiDefaultProp()
     hoverable = false;
 
-    @HostBinding('attr.data-tui-host-mode')
-    mode: TuiBrightness | null = null;
-
-    constructor(@Inject(TUI_MODE) mode$: Observable<TuiBrightness | null>) {
-        mode$.subscribe(mode => {
-            this.mode = mode;
-        });
-    }
+    constructor(@Inject(TUI_MODE) readonly mode$: Observable<TuiBrightness | null>) {}
 
     @HostBinding('attr.data-tui-host-padding')
     get padding(): string {
-        return typeof this.value.valueOf() === 'number' ? 'm' : 'l';
+        if (this.isEmpty) {
+            return 'none';
+        }
+
+        return isNumber(this.value.valueOf()) ? 'm' : 'l';
     }
 
-    get outputValue(): number | string {
-        if (typeof this.value.valueOf() === 'number' && this.value.valueOf() > 99) {
+    get outputValue(): string {
+        if (isNumber(this.value.valueOf()) && this.value.valueOf() > 99) {
             return '99+';
         } else {
-            return this.value;
+            return String(this.value);
         }
+    }
+
+    @HostBinding('class._empty-value')
+    get isEmpty(): boolean {
+        return this.value === '';
     }
 }

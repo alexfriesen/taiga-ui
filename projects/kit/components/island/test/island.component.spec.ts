@@ -3,7 +3,6 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TuiSizeL} from '@taiga-ui/core';
 import {PageObject} from '@taiga-ui/testing';
 import {configureTestSuite} from 'ng-bullet';
-import {TuiTextAlign} from '../../../enums/text-align';
 import {TuiIslandComponent} from '../island.component';
 import {TuiIslandModule} from '../island.module';
 
@@ -25,7 +24,7 @@ describe('Island', () => {
         component: TuiIslandComponent;
 
         hoverable = false;
-        textAlign: TuiTextAlign = TuiTextAlign.Left;
+        textAlign: 'left' | 'right' | 'center' = 'left';
         size: TuiSizeL = 'm';
     }
 
@@ -59,13 +58,13 @@ describe('Island', () => {
     });
 
     describe('size:', () => {
-        it('если значение не задано, размер айленда m', () => {
+        it('if not specified, island size m', () => {
             const size = component.sizeM;
 
             expect(size).toBe(true);
         });
 
-        it('если значение l, размер айленда l', () => {
+        it('if the value is l, the size of the island is l', () => {
             testComponent.size = 'l';
             fixture.detectChanges();
 
@@ -76,14 +75,14 @@ describe('Island', () => {
     });
 
     describe('textAlign:', () => {
-        it('если значение не задано, текст выровнен по левому краю', () => {
+        it('if no value is specified, the text is left aligned', () => {
             const textAlign = component.textAlignLeft;
 
             expect(textAlign).toBe(true);
         });
 
-        it('если передать center, текст будет выровнен по центру', () => {
-            testComponent.textAlign = TuiTextAlign.Center;
+        it('if you pass center, the text will be centered', () => {
+            testComponent.textAlign = 'center';
             fixture.detectChanges();
 
             const textAlign = component.textAlignCenter;
@@ -93,7 +92,7 @@ describe('Island', () => {
     });
 
     describe('hoverable:', () => {
-        it('если true, ховер работает', () => {
+        it('if true, hover works', () => {
             testComponent.hoverable = true;
             fixture.detectChanges();
 

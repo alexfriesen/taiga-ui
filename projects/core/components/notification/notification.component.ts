@@ -10,13 +10,14 @@ import {
 import {tuiDefaultProp} from '@taiga-ui/cdk';
 import {TuiNotification} from '@taiga-ui/core/enums';
 import {TUI_CLOSE_WORD} from '@taiga-ui/core/tokens';
+import {Observable} from 'rxjs';
 
-export const STATUS_ICON: Record<string, string> = {
+export const STATUS_ICON = {
     info: 'tuiIconInfo',
     success: 'tuiIconCheckCircle',
     error: 'tuiIconCancel',
     warning: 'tuiIconAttention',
-};
+} as const;
 
 // @bad TODO: Think about moving to kit
 @Component({
@@ -34,12 +35,12 @@ export class TuiNotificationComponent {
     @Input()
     @HostBinding('attr.data-tui-host-status')
     @tuiDefaultProp()
-    status: TuiNotification = TuiNotification.Info;
+    status: 'info' | 'error' | 'warning' | 'success' = TuiNotification.Info;
 
     @Output()
     readonly close = new EventEmitter<void>();
 
-    constructor(@Inject(TUI_CLOSE_WORD) readonly closeWord: string) {}
+    constructor(@Inject(TUI_CLOSE_WORD) readonly closeWord$: Observable<string>) {}
 
     get icon(): string {
         return STATUS_ICON[this.status];

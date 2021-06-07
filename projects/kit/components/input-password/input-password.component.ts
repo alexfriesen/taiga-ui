@@ -12,15 +12,30 @@ import {NgControl} from '@angular/forms';
 import {
     AbstractTuiControl,
     TUI_FOCUSABLE_ITEM_ACCESSOR,
+    TuiContextWithImplicit,
     TuiFocusableElementAccessor,
     TuiNativeFocusableElement,
+    tuiPure,
 } from '@taiga-ui/cdk';
 import {
+    HINT_CONTROLLER_PROVIDER,
+    MODE_PROVIDER,
+    TUI_HINT_WATCHED_CONTROLLER,
+    TUI_MODE,
     TUI_TEXTFIELD_SIZE,
+    TuiBrightness,
+    TuiHintControllerDirective,
+    TuiHintModeT,
     TuiPrimitiveTextfieldComponent,
+    TuiSizeL,
+    TuiSizeS,
     TuiTextfieldSizeDirective,
 } from '@taiga-ui/core';
 import {TUI_PASSWORD_TEXTS} from '@taiga-ui/kit/tokens';
+import {PolymorpheusContent} from '@tinkoff/ng-polymorpheus';
+import {combineLatest, Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {InputPasswordOptions, TUI_INPUT_PASSWORD_OPTIONS} from './input-password-options';
 
 // @dynamic
 @Component({
@@ -33,15 +48,30 @@ import {TUI_PASSWORD_TEXTS} from '@taiga-ui/kit/tokens';
             provide: TUI_FOCUSABLE_ITEM_ACCESSOR,
             useExisting: forwardRef(() => TuiInputPasswordComponent),
         },
+        HINT_CONTROLLER_PROVIDER,
+        MODE_PROVIDER,
     ],
 })
 export class TuiInputPasswordComponent
     extends AbstractTuiControl<string>
     implements TuiFocusableElementAccessor {
-    private isPasswordHidden = true;
+    isPasswordHidden = true;
 
     @ViewChild(TuiPrimitiveTextfieldComponent)
     private readonly textfield?: TuiPrimitiveTextfieldComponent;
+
+    readonly computedMode$: Observable<
+        TuiBrightness | TuiHintModeT | null
+    > = combineLatest([
+        this.mode$,
+        this.hintController.change$.pipe(
+            startWith(null),
+            map(() => this.hintController.mode),
+        ),
+    ]).pipe(
+        map(([mode, controller]) => controller || mode),
+        startWith(null),
+    );
 
     constructor(
         @Optional()
@@ -51,7 +81,14 @@ export class TuiInputPasswordComponent
         @Inject(ChangeDetectorRef) changeDetectorRef: ChangeDetectorRef,
         @Inject(TUI_TEXTFIELD_SIZE)
         private readonly textfieldSize: TuiTextfieldSizeDirective,
-        @Inject(TUI_PASSWORD_TEXTS) private readonly passwordTexts: [string, string],
+        @Inject(TUI_PASSWORD_TEXTS)
+        readonly passwordTexts$: Observable<[string, string]>,
+        @Inject(TUI_INPUT_PASSWORD_OPTIONS)
+        public readonly options: InputPasswordOptions,
+        @Inject(TUI_HINT_WATCHED_CONTROLLER)
+        readonly hintController: TuiHintControllerDirective,
+        @Inject(TUI_MODE)
+        private readonly mode$: Observable<TuiBrightness | null>,
     ) {
         super(control, changeDetectorRef);
     }
@@ -66,16 +103,19 @@ export class TuiInputPasswordComponent
         return !!this.textfield && this.textfield.focused;
     }
 
-    get icon(): string {
-        if (this.textfieldSize.size === 's') {
-            return this.isPasswordHidden ? 'tuiIconEyeClosed' : 'tuiIconEyeOpen';
-        }
-
-        return this.isPasswordHidden ? 'tuiIconHideLarge' : 'tuiIconShowLarge';
+    get icon(): PolymorpheusContent<TuiContextWithImplicit<TuiSizeS | TuiSizeL>> {
+        return this.isPasswordHidden ? this.options.icons.hide : this.options.icons.show;
     }
 
-    get hint(): string {
-        return this.isPasswordHidden ? this.passwordTexts[0] : this.passwordTexts[1];
+    get context(): TuiContextWithImplicit<TuiSizeS | TuiSizeL> {
+        return this.getContext(this.textfieldSize.size);
+    }
+
+    @tuiPure
+    private getContext(
+        $implicit: TuiSizeS | TuiSizeL,
+    ): TuiContextWithImplicit<TuiSizeS | TuiSizeL> {
+        return {$implicit};
     }
 
     get inputType(): string {

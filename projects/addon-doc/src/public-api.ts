@@ -22,17 +22,17 @@ export * from './components/page/page.component';
 export * from './components/page/page.module';
 export * from './components/page/page-tab.directive';
 
-/* Constants */
-export * from './constants/page-modules';
-
 /* Interfaces */
+export * from './interfaces/code-editor';
 export * from './interfaces/page';
 export * from './interfaces/source-code-path-options';
 
-/* Services */
-export * from './services/clipboard-copy.service';
+/* Languages */
+export * from './languages/russian';
 
 /* Tokens */
+export * from './tokens/code-editor';
+export * from './tokens/example-content-processor';
 export * from './tokens/default-tabs';
 export * from './tokens/i18n';
 export * from './tokens/logo';
@@ -46,3 +46,5 @@ export * from './types/pages';
 
 /* Utils */
 export * from './utils/generate-routes';
+
+export * from './addon-doc.module';

@@ -3,6 +3,7 @@ import {
     ChangeDetectorRef,
     Component,
     forwardRef,
+    HostListener,
     Inject,
     Input,
     Optional,
@@ -43,6 +44,11 @@ import {
     tuiCreateTimeMask,
 } from '@taiga-ui/kit/utils/mask';
 import {TuiReplayControlValueChangesFactory} from '@taiga-ui/kit/utils/miscellaneous';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+
+// TODO: remove in ivy compilation
+export const TIME_STREAM_FACTORY = TuiReplayControlValueChangesFactory;
 
 // @dynamic
 @Component({
@@ -58,7 +64,7 @@ import {TuiReplayControlValueChangesFactory} from '@taiga-ui/kit/utils/miscellan
         {
             provide: TUI_CALENDAR_DATA_STREAM,
             deps: [[new Optional(), new Self(), NgControl]],
-            useFactory: TuiReplayControlValueChangesFactory,
+            useFactory: TIME_STREAM_FACTORY,
         },
         LEFT_ALIGNED_DROPDOWN_CONTROLLER_PROVIDER,
     ],
@@ -102,17 +108,14 @@ export class TuiInputDateTimeComponent
         @Inject(TUI_TEXTFIELD_SIZE)
         private readonly textfieldSize: TuiTextfieldSizeDirective,
         @Inject(TUI_DATE_FILLER) readonly dateFiller: string,
-        @Inject(TUI_TIME_TEXTS) private readonly timeTexts: Record<TuiTimeMode, string>,
+        @Inject(TUI_TIME_TEXTS)
+        readonly timeTexts$: Observable<Record<TuiTimeMode, string>>,
     ) {
         super(control, changeDetectorRef);
     }
 
-    get filler(): string {
-        return `${this.dateFiller}${DATE_TIME_SEPARATOR}${this.timeFiller}`;
-    }
-
-    get timeFiller(): string {
-        return this.timeTexts[this.timeMode];
+    get fillerLength(): number {
+        return this.dateFiller.length + DATE_TIME_SEPARATOR.length + this.timeMode.length;
     }
 
     get textMaskOptions(): TuiTextMaskOptions {
@@ -145,7 +148,7 @@ export class TuiInputDateTimeComponent
 
         if (
             (date && !nativeValue) ||
-            (date && nativeValue.length === this.filler.length) ||
+            (date && nativeValue.length === this.dateFiller.length) ||
             (date && time)
         ) {
             return `${date.toString()}${DATE_TIME_SEPARATOR}${
@@ -184,12 +187,20 @@ export class TuiInputDateTimeComponent
         return !this.computedDisabled && !this.readOnly;
     }
 
-    onMouseDown() {
+    @tuiPure
+    getFiller$(dateFiller: string, timeMode: TuiTimeMode): Observable<string> {
+        return this.timeTexts$.pipe(
+            map(texts => `${dateFiller}${DATE_TIME_SEPARATOR}${texts[timeMode]}`),
+        );
+    }
+
+    @HostListener('click')
+    onClick() {
         this.open = !this.open;
     }
 
     onValueChange(value: string) {
-        if (value.length < this.filler.length) {
+        if (value.length < this.dateFiller.length) {
             this.updateValue([null, null]);
 
             return;
@@ -199,7 +210,7 @@ export class TuiInputDateTimeComponent
 
         const parsedDate = TuiDay.normalizeParse(date);
         const parsedTime =
-            time && time.length === this.timeFiller.length
+            time && time.length === this.timeMode.length
                 ? TuiTime.fromString(time)
                 : null;
 
@@ -212,6 +223,7 @@ export class TuiInputDateTimeComponent
 
     onDayClick(day: TuiDay) {
         this.updateValue([day, this.value[1]]);
+        this.updateNativeValue(day);
         this.open = false;
     }
 
@@ -234,7 +246,7 @@ export class TuiInputDateTimeComponent
             focused ||
             this.value[0] === null ||
             this.value[1] !== null ||
-            this.nativeValue.length <= this.filler.length + DATE_TIME_SEPARATOR.length ||
+            this.nativeValue.length <= this.fillerLength + DATE_TIME_SEPARATOR.length ||
             this.timeMode === 'HH:MM'
         ) {
             return;
@@ -284,6 +296,12 @@ export class TuiInputDateTimeComponent
                 (a, b) => a.toString() === b.toString(),
             )
         );
+    }
+
+    private updateNativeValue(day: TuiDay) {
+        const time = this.nativeValue.split(DATE_TIME_SEPARATOR)[1] || '';
+
+        this.nativeValue = `${day.toString()}${DATE_TIME_SEPARATOR}${time}`;
     }
 
     @tuiPure

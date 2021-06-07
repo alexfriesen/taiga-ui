@@ -1,5 +1,4 @@
 import {default as example1Html} from '!!raw-loader!./examples/1/index.html';
-import {default as example1Less} from '!!raw-loader!./examples/1/index.less';
 import {default as example1Ts} from '!!raw-loader!./examples/1/index.ts';
 
 import {default as example2Html} from '!!raw-loader!./examples/2/index.html';
@@ -7,7 +6,6 @@ import {default as example2Less} from '!!raw-loader!./examples/2/index.less';
 import {default as example2Ts} from '!!raw-loader!./examples/2/index.ts';
 
 import {default as example3Html} from '!!raw-loader!./examples/3/index.html';
-import {default as example3Less} from '!!raw-loader!./examples/3/index.less';
 import {default as example3Ts} from '!!raw-loader!./examples/3/index.ts';
 
 import {default as example4Html} from '!!raw-loader!./examples/4/index.html';
@@ -33,7 +31,7 @@ import {
 import {
     DEFAULT_MAX_HEIGHT,
     DEFAULT_MIN_HEIGHT,
-    TuiDropdownWidth,
+    TuiDropdownWidthT,
     TuiHorizontalDirection,
     TuiSizeL,
     TuiVerticalDirection,
@@ -41,8 +39,8 @@ import {
 import {PolymorpheusContent, PolymorpheusTemplate} from '@tinkoff/ng-polymorpheus';
 import {changeDetection} from '../../../change-detection-strategy';
 import {FrontEndExample} from '../../interfaces/front-end-example';
+import {AbstractExampleTuiControl} from '../abstract/control';
 import {ABSTRACT_PROPS_ACCESSOR} from '../abstract/inherited-documentation/abstract-props-accessor';
-import {AbstractExampleTuiReactiveField} from '../abstract/reactive-field';
 
 class Account {
     constructor(readonly name: string, readonly balance: number) {}
@@ -64,7 +62,7 @@ class Account {
         },
     ],
 })
-export class ExampleTuiMultiSelectComponent extends AbstractExampleTuiReactiveField {
+export class ExampleTuiMultiSelectComponent extends AbstractExampleTuiControl {
     @ViewChild('item')
     content?: PolymorpheusTemplate<{}>;
 
@@ -75,7 +73,6 @@ export class ExampleTuiMultiSelectComponent extends AbstractExampleTuiReactiveFi
     readonly example1: FrontEndExample = {
         TypeScript: example1Ts,
         HTML: example1Html,
-        LESS: example1Less,
     };
 
     readonly example2: FrontEndExample = {
@@ -87,7 +84,6 @@ export class ExampleTuiMultiSelectComponent extends AbstractExampleTuiReactiveFi
     readonly example3: FrontEndExample = {
         TypeScript: example3Ts,
         HTML: example3Html,
-        LESS: example3Less,
     };
 
     readonly example4: FrontEndExample = {
@@ -118,12 +114,9 @@ export class ExampleTuiMultiSelectComponent extends AbstractExampleTuiReactiveFi
 
     editable = true;
 
-    readonly dropdownLimitWidthVariants: ReadonlyArray<TuiDropdownWidth> = [
-        TuiDropdownWidth.Fixed,
-        TuiDropdownWidth.Min,
-    ];
+    readonly dropdownLimitWidthVariants: readonly TuiDropdownWidthT[] = ['fixed', 'min'];
 
-    dropdownLimitWidth: TuiDropdownWidth | null = this.dropdownLimitWidthVariants[0];
+    dropdownLimitWidth: TuiDropdownWidthT | null = this.dropdownLimitWidthVariants[0];
 
     search = '';
 

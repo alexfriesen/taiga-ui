@@ -211,7 +211,7 @@
 }
 
 // transition
-.transition(@param, @speed: 0.3s) {
+.transition(@param, @speed: var(--tui-duration, 300ms)) {
     transition-property: @param;
     transition-duration: @speed;
     transition-timing-function: ease-in-out;
@@ -241,6 +241,7 @@
     .transition(all);
     cursor: pointer;
     transition-property: transform, box-shadow;
+    will-change: transform, box-shadow;
 
     &:hover {
         .shadow(5);

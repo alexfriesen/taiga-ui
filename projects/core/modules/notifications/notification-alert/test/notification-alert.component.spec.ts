@@ -1,6 +1,6 @@
 import {CommonModule} from '@angular/common';
 import {Component, Inject, NgModule, ViewChild} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {PageObject} from '@taiga-ui/testing';
 import {POLYMORPHEUS_CONTEXT, PolymorpheusComponent} from '@tinkoff/ng-polymorpheus';
 import {TuiNotificationContentContext} from '../../notification-content-context';
@@ -93,27 +93,27 @@ describe('NotificationAlertComponent', () => {
         component = testComponent.component;
     });
 
-    describe('Alert класс', () => {
+    describe('Alert class', () => {
         beforeEach(() => {
             fixture.detectChanges();
         });
 
-        it('Значение status по умолчанию', () => {
+        it('Default status', () => {
             expect(component.item!.status).toBe('info');
         });
 
-        it('Значение autoclose по умолчанию', () => {
+        it('Default autoclose', () => {
             expect(component.item!.autoClose).toBe(true);
         });
     });
 
-    describe('Отображение', () => {
+    describe('Display', () => {
         beforeEach(() => {
             testComponent.alert = new NotificationAlert(observerMock, content, {label});
             fixture.detectChanges();
         });
 
-        it('Показывает заголовок', () => {
+        it('Shows the title', () => {
             expect(
                 pageObject
                     .getByAutomationId(`${testContext.prefix}heading`)!
@@ -121,7 +121,7 @@ describe('NotificationAlertComponent', () => {
             ).toBe(label);
         });
 
-        it('Показывает текст', () => {
+        it('Shows text', () => {
             expect(
                 pageObject
                     .getByAutomationId(`${testContext.prefix}content`)!
@@ -130,15 +130,30 @@ describe('NotificationAlertComponent', () => {
         });
     });
 
-    it('close | Закрывает Alert и оповещает observer', () => {
+    it('close | Close the Alert and notify the observer', () => {
         fixture.detectChanges();
-        component.closeDialog();
+        component.closeNotification();
 
         expect(nextSpy).not.toHaveBeenCalled();
         expect(completeSpy).toHaveBeenCalled();
     });
 
-    describe('processComponent | Alert с произвольным шаблоном', () => {
+    it('close | Close the Alert after custom autoClose timeout', fakeAsync(() => {
+        const customTimeoutMs = 1000;
+
+        testComponent.alert = new NotificationAlert(
+            observerMock,
+            new PolymorpheusComponent(AlertConstructorMock),
+            {label, data, autoClose: customTimeoutMs},
+        );
+        fixture.detectChanges();
+
+        expect(completeSpy).not.toHaveBeenCalled();
+        tick(customTimeoutMs);
+        expect(completeSpy).toHaveBeenCalled();
+    }));
+
+    describe('processComponent | Alert with custom template', () => {
         beforeEach(() => {
             testComponent.alert = new NotificationAlert(
                 observerMock,
@@ -148,7 +163,7 @@ describe('NotificationAlertComponent', () => {
             fixture.detectChanges();
         });
 
-        it('Alert с произвольным шаблоном может передавать данные', () => {
+        it('Alert with custom template can transmit data', () => {
             pageObject
                 .getByAutomationId(`${testContext.prefix}submit`)!
                 .nativeElement.click();
@@ -156,7 +171,7 @@ describe('NotificationAlertComponent', () => {
             expect(nextSpy).toHaveBeenCalledWith(data);
         });
 
-        it('Alert с произвольным шаблоном может закрыться', () => {
+        it('Alert with custom template can close', () => {
             pageObject
                 .getByAutomationId(`${testContext.prefix}complete`)!
                 .nativeElement.click();

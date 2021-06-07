@@ -14,17 +14,13 @@ import {
 import {NgControl} from '@angular/forms';
 import {
     AbstractTuiControl,
-    identity,
     isNativeFocused,
     TUI_FOCUSABLE_ITEM_ACCESSOR,
     tuiDefaultProp,
     TuiFocusableElementAccessor,
     TuiNativeFocusableElement,
-    TuiStringHandler,
 } from '@taiga-ui/cdk';
-import {TuiTextMaskOptions} from '@taiga-ui/core';
-import {EMPTY_MASK} from '@taiga-ui/kit/constants';
-import {conformToMask} from 'angular2-text-mask';
+import {TUI_VALUE_ACCESSOR_PROVIDER} from '@taiga-ui/kit/providers';
 
 @Component({
     selector: 'tui-input-inline',
@@ -32,6 +28,7 @@ import {conformToMask} from 'angular2-text-mask';
     styleUrls: ['./input-inline.style.less'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
+        TUI_VALUE_ACCESSOR_PROVIDER,
         {
             provide: TUI_FOCUSABLE_ITEM_ACCESSOR,
             useExisting: forwardRef(() => TuiInputInlineComponent),
@@ -44,14 +41,6 @@ export class TuiInputInlineComponent
     @Input()
     @tuiDefaultProp()
     maxLength: number | null = null;
-
-    @Input()
-    @tuiDefaultProp()
-    textMaskOptions: TuiTextMaskOptions | null = null;
-
-    @Input()
-    @tuiDefaultProp()
-    unmaskHandler: TuiStringHandler<string> = identity;
 
     @ViewChild('native')
     private readonly native?: ElementRef<HTMLInputElement>;
@@ -66,12 +55,6 @@ export class TuiInputInlineComponent
         super(control, changeDetectorRef);
     }
 
-    get maxLengthMasked(): number | null {
-        return this.textMaskOptions && this.textMaskOptions.placeholderChar
-            ? null
-            : this.maxLength;
-    }
-
     get nativeFocusableElement(): TuiNativeFocusableElement | null {
         return !this.native ? null : this.native.nativeElement;
     }
@@ -84,37 +67,15 @@ export class TuiInputInlineComponent
         return this.value !== '';
     }
 
-    get computedMask(): TuiTextMaskOptions {
-        return this.textMaskOptions || EMPTY_MASK;
-    }
-
     @HostBinding('attr.data-value')
     get maskedValue(): string {
-        if (!this.textMaskOptions || this.value === '') {
-            return String(this.value);
-        }
-
-        const {
-            guide,
-            placeholderChar,
-            pipe,
-            keepCharPositions,
-            showMask,
-            mask,
-        } = this.textMaskOptions;
-        const value = conformToMask(String(this.value), mask, {
-            guide,
-            placeholderChar,
-            pipe,
-            keepCharPositions,
-            showMask,
-        });
-
-        return value.conformedValue;
+        return this.native && this.value
+            ? this.native.nativeElement.value
+            : String(this.value);
     }
 
-    onNativeModelChange(value: string) {
-        this.updateValue(this.unmaskHandler(value));
+    onValueChange(value: string) {
+        this.updateValue(value);
     }
 
     onFocused(focused: boolean) {

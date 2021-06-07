@@ -5,10 +5,10 @@ import {default as exampleImportModule} from '!!raw-loader!./examples/import/imp
 import {default as exampleInsertTemplate} from '!!raw-loader!./examples/import/insert-template.txt';
 
 import {Component, forwardRef, ViewChild} from '@angular/core';
-import {TuiAutofillFieldName, TuiInputMode, TuiInputType} from '@taiga-ui/cdk';
+import {TuiAutofillFieldName, TuiInputModeT, TuiInputTypeT} from '@taiga-ui/cdk';
 import {
     TuiDirection,
-    TuiHintMode,
+    TuiHintModeT,
     TuiHorizontalDirection,
     TuiSizeL,
     TuiSizeS,
@@ -16,8 +16,8 @@ import {
 import {PolymorpheusContent, PolymorpheusTemplate} from '@tinkoff/ng-polymorpheus';
 import {changeDetection} from '../../../change-detection-strategy';
 import {FrontEndExample} from '../../interfaces/front-end-example';
-import {AbstractExampleTuiField} from '../abstract/field';
 import {ABSTRACT_PROPS_ACCESSOR} from '../abstract/inherited-documentation/abstract-props-accessor';
+import {AbstractExampleTuiInteractive} from '../abstract/interactive';
 
 const CUSTOM_SVG = `<svg xmlns="http://www.w3.org/2000/svg"
 width="24px"
@@ -40,7 +40,7 @@ viewBox="0 0 24 24">
         },
     ],
 })
-export class ExampleTuiPrimitiveTextfieldComponent extends AbstractExampleTuiField {
+export class ExampleTuiPrimitiveTextfieldComponent extends AbstractExampleTuiInteractive {
     readonly example1: FrontEndExample = {
         TypeScript: example1Ts,
         HTML: example1Html,
@@ -61,15 +61,15 @@ export class ExampleTuiPrimitiveTextfieldComponent extends AbstractExampleTuiFie
 
     iconAlign: TuiHorizontalDirection = this.iconAlignVariants[1];
 
-    readonly typeVariants: ReadonlyArray<TuiInputType> = [
-        TuiInputType.Text,
-        TuiInputType.Email,
-        TuiInputType.Password,
-        TuiInputType.Tel,
-        TuiInputType.Url,
+    readonly typeVariants: readonly TuiInputTypeT[] = [
+        'text',
+        'email',
+        'password',
+        'tel',
+        'url',
     ];
 
-    type: TuiInputType = this.typeVariants[0];
+    type = 'text';
 
     cleaner = false;
 
@@ -102,10 +102,7 @@ export class ExampleTuiPrimitiveTextfieldComponent extends AbstractExampleTuiFie
 
     autocomplete: TuiAutofillFieldName | null = null;
 
-    readonly inputModeVariants: ReadonlyArray<TuiInputMode> = [
-        TuiInputMode.Text,
-        TuiInputMode.Numeric,
-    ];
+    readonly inputModeVariants: readonly TuiInputModeT[] = ['text', 'numeric'];
 
     inputMode = this.inputModeVariants[0];
 
@@ -140,10 +137,7 @@ export class ExampleTuiPrimitiveTextfieldComponent extends AbstractExampleTuiFie
         'top-right',
     ];
 
-    readonly hintModeVariants: ReadonlyArray<TuiHintMode> = [
-        TuiHintMode.Error,
-        TuiHintMode.OnDark,
-    ];
+    readonly hintModeVariants: readonly TuiHintModeT[] = ['error', 'onDark'];
 
     invalid = false;
 
@@ -151,9 +145,9 @@ export class ExampleTuiPrimitiveTextfieldComponent extends AbstractExampleTuiFie
 
     hintDirection: TuiDirection = this.hintDirectionVariants[2];
 
-    hintMode: TuiHintMode | null = null;
+    hintMode: TuiHintModeT | null = null;
 
-    @ViewChild('tuiIconInteractiveContent')
+    @ViewChild('interactiveContent')
     private readonly interactiveIcon?: PolymorpheusTemplate<{}>;
 
     get customContent(): string | null {

@@ -7,10 +7,11 @@
 >
     <tui-primitive-textfield
         class="textfield"
+        tuiValueAccessor
         [pseudoFocused]="pseudoFocused"
         [pseudoHovered]="pseudoHovered"
         [invalid]="computedInvalid"
-        [filler]="filler"
+        [filler]="getFiller$(dateFiller, timeMode) | async"
         [nativeId]="nativeId"
         [readOnly]="readOnly"
         [iconContent]="calendarIcon"
@@ -20,7 +21,6 @@
         (valueChange)="onValueChange($event)"
         (hoveredChange)="onHovered($event)"
         (focusedChange)="onFocused($event)"
-        (mousedown)="onMouseDown()"
     >
         <ng-content></ng-content>
     </tui-primitive-textfield>

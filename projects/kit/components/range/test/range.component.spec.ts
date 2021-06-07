@@ -15,6 +15,7 @@ describe('Range', () => {
                 [min]="min"
                 [steps]="steps"
                 [segments]="segments"
+                [quantum]="quantum"
             ></tui-range>
         `,
     })
@@ -27,6 +28,7 @@ describe('Range', () => {
         min = 1;
         segments = 10;
         steps = 10;
+        quantum = 0;
     }
 
     let fixture: ComponentFixture<TestComponent>;
@@ -69,28 +71,28 @@ describe('Range', () => {
         fixture.detectChanges();
     });
 
-    it('Полоса заполнена с 20% до 40%', () => {
+    it('The bar is filled from 20% to 40%', () => {
         expect(getBar().style.left).toBe('20%');
         expect(getBar().style.right).toBe('60%');
     });
 
-    describe('Изменение значений', () => {
-        describe('Левая точка', () => {
-            it('При нажатии на стрелку влево уменьшает значение на один шаг', () => {
+    describe('Changing values', () => {
+        describe('Left point', () => {
+            it('Pressing the left arrow decreases the value by one step', () => {
                 getLeft().dispatchEvent(keydownArrowLeft);
 
                 expect(testComponent.testValue.value[0]).toBe(2);
                 expect(testComponent.testValue.value[1]).toBe(5);
             });
 
-            it('При нажатии на стрелку вправо увеличивает значение на один шаг', () => {
+            it('Pressing the right arrow increases the value by one step', () => {
                 getLeft().dispatchEvent(keydownArrowRight);
 
                 expect(testComponent.testValue.value[0]).toBe(4);
                 expect(testComponent.testValue.value[1]).toBe(5);
             });
 
-            it('При нажатии на стрелку влево корректно закрашивает полоску', () => {
+            it('Pressing the left arrow correctly paints the strip', () => {
                 getLeft().dispatchEvent(keydownArrowLeft);
                 fixture.detectChanges();
 
@@ -98,7 +100,7 @@ describe('Range', () => {
                 expect(getBar().style.right).toBe('60%');
             });
 
-            it('При нажатии на стрелку вправо корректно закрашивает полоску', () => {
+            it('Pressing the right arrow correctly paints the strip', () => {
                 getLeft().dispatchEvent(keydownArrowRight);
                 fixture.detectChanges();
 
@@ -107,22 +109,22 @@ describe('Range', () => {
             });
         });
 
-        describe('Правая точка', () => {
-            it('При нажатии на стрелку влево уменьшает значение на один шаг', () => {
+        describe('Right point', () => {
+            it('Pressing the left arrow decreases the value by one step', () => {
                 getRight().dispatchEvent(keydownArrowLeft);
 
                 expect(testComponent.testValue.value[0]).toBe(3);
                 expect(testComponent.testValue.value[1]).toBe(4);
             });
 
-            it('При нажатии на стрелку вправо увеличивает значение на один шаг', () => {
+            it('Pressing the right arrow increases the value by one step', () => {
                 getRight().dispatchEvent(keydownArrowRight);
 
                 expect(testComponent.testValue.value[0]).toBe(3);
                 expect(testComponent.testValue.value[1]).toBe(6);
             });
 
-            it('При нажатии на стрелку влево корректно закрашивает полоску', () => {
+            it('Pressing the left arrow correctly paints the strip', () => {
                 getRight().dispatchEvent(keydownArrowLeft);
                 fixture.detectChanges();
 
@@ -130,7 +132,7 @@ describe('Range', () => {
                 expect(getBar().style.right).toBe('70%');
             });
 
-            it('При нажатии на стрелку вправо корректно закрашивает полоску', () => {
+            it('Pressing the right arrow correctly paints the strip', () => {
                 getRight().dispatchEvent(keydownArrowRight);
                 fixture.detectChanges();
 
@@ -139,8 +141,8 @@ describe('Range', () => {
             });
         });
 
-        describe('Границы', () => {
-            it('Не даёт левой границе превысить правую', () => {
+        describe('Borders', () => {
+            it('Prevents the left border from exceeding the right', () => {
                 testComponent.testValue.setValue([5, 5]);
                 getLeft().dispatchEvent(keydownArrowRight);
                 fixture.detectChanges();
@@ -148,7 +150,7 @@ describe('Range', () => {
                 expect(testComponent.testValue.value[0]).toBe(5);
             });
 
-            it('Не даёт правой границе снизиться ниже левой', () => {
+            it('Prevents the right border from dropping below the left', () => {
                 testComponent.testValue.setValue([5, 5]);
                 getRight().dispatchEvent(keydownArrowLeft);
                 fixture.detectChanges();
@@ -156,7 +158,7 @@ describe('Range', () => {
                 expect(testComponent.testValue.value[1]).toBe(5);
             });
 
-            it('Не даёт значению убавиться ниже минимального', () => {
+            it('Prevents the value from decreasing below the minimum', () => {
                 testComponent.testValue.setValue([1, 11]);
                 getLeft().dispatchEvent(keydownArrowLeft);
                 fixture.detectChanges();
@@ -164,7 +166,7 @@ describe('Range', () => {
                 expect(testComponent.testValue.value[0]).toBe(1);
             });
 
-            it('Не даёт значению превысить максимальное', () => {
+            it('Prevents the value from exceeding the maximum', () => {
                 testComponent.testValue.setValue([1, 11]);
                 getRight().dispatchEvent(keydownArrowRight);
                 fixture.detectChanges();
@@ -172,12 +174,49 @@ describe('Range', () => {
                 expect(testComponent.testValue.value[1]).toBe(11);
             });
 
-            it('Прибивает значение к ближайшему допустимому шагу', () => {
+            it('Adds a value to the closest allowed step', () => {
                 testComponent.testValue.setValue([3.3, 5]);
                 getLeft().dispatchEvent(keydownArrowRight);
                 fixture.detectChanges();
 
                 expect(testComponent.testValue.value[0]).toBe(4);
+            });
+        });
+
+        describe('Quantum', () => {
+            beforeEach(() => {
+                testComponent.min = 0;
+                testComponent.max = 10;
+                testComponent.quantum = 0.1;
+                testComponent.steps = 0;
+                testComponent.testValue.setValue([1, 5]);
+                fixture.detectChanges();
+            });
+
+            it('Pressing the right arrow without specified steps increases the value by one quantum', () => {
+                getLeft().dispatchEvent(keydownArrowRight);
+                fixture.detectChanges();
+
+                expect(testComponent.testValue.value[0]).toBe(1.1);
+            });
+
+            it('Pressing the left arrow without specified steps decreases the value by one step', () => {
+                getRight().dispatchEvent(keydownArrowLeft);
+                fixture.detectChanges();
+
+                expect(testComponent.testValue.value[1]).toBe(4.9);
+            });
+
+            it('Adds a value to the closest allowed step and round to the closest quantum', () => {
+                testComponent.testValue.setValue([0, 10]);
+                testComponent.quantum = 1;
+                testComponent.steps = 3;
+                fixture.detectChanges();
+
+                getLeft().dispatchEvent(keydownArrowRight);
+                fixture.detectChanges();
+
+                expect(testComponent.testValue.value[0]).toBe(3);
             });
         });
     });

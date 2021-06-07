@@ -1,7 +1,7 @@
-<tui-doc-page i18n-header header="Toggle" package="KIT">
+<tui-doc-page i18n-header header="Toggle" package="KIT" type="components">
     <ng-template pageTab>
         <p i18n>
-            Toggle is a switcher between two states. It can be also used with
+            Toggle is a switcher between two states. It can also be used with
             icons and loading.
         </p>
 
@@ -36,36 +36,6 @@
                 [(documentationPropertyValue)]="disabled"
             >
                 Disabled state (use <code>formControl.disable()</code>)
-            </ng-template>
-            <ng-template
-                i18n
-                documentationPropertyName="pseudoFocused"
-                documentationPropertyMode="input"
-                documentationPropertyType="boolean | null"
-                [documentationPropertyValues]="pseudoVariants"
-                [(documentationPropertyValue)]="pseudoFocused"
-            >
-                Visual focused state
-            </ng-template>
-            <ng-template
-                i18n
-                documentationPropertyName="pseudoHovered"
-                documentationPropertyMode="input"
-                documentationPropertyType="boolean | null"
-                [documentationPropertyValues]="pseudoVariants"
-                [(documentationPropertyValue)]="pseudoHovered"
-            >
-                Visual hovered state
-            </ng-template>
-            <ng-template
-                i18n
-                documentationPropertyName="pseudoPressed"
-                documentationPropertyMode="input"
-                documentationPropertyType="boolean | null"
-                [documentationPropertyValues]="pseudoVariants"
-                [(documentationPropertyValue)]="pseudoPressed"
-            >
-                Visual pseudo state
             </ng-template>
             <ng-template
                 i18n

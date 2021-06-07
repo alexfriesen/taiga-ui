@@ -10,7 +10,7 @@ import {
     Output,
     ViewChild,
 } from '@angular/core';
-import {setNativeFocused, tuiDefaultProp, TuiDestroyService} from '@taiga-ui/cdk';
+import {setNativeFocused, tuiDefaultProp} from '@taiga-ui/cdk';
 import {
     MODE_PROVIDER,
     sizeBigger,
@@ -20,7 +20,7 @@ import {
     TuiSizeS,
     TuiSizeXS,
 } from '@taiga-ui/core';
-import {TuiStatus} from '@taiga-ui/kit/enums';
+import {TuiStatusT} from '@taiga-ui/kit/types';
 import {stringHashToHsl} from '@taiga-ui/kit/utils/format';
 import {PolymorpheusContent} from '@tinkoff/ng-polymorpheus';
 import {Observable} from 'rxjs';
@@ -32,7 +32,10 @@ export const ALLOWED_SPACE_REGEXP = new RegExp(`\,|[\\s]`);
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './tag.template.html',
     styleUrls: ['./tag.style.less'],
-    providers: [TuiDestroyService, MODE_PROVIDER],
+    providers: [MODE_PROVIDER],
+    host: {
+        '($.data-mode.attr)': 'mode$',
+    },
 })
 export class TuiTagComponent {
     // TODO: Possibly implement standard focus mechanisms and outline
@@ -64,7 +67,7 @@ export class TuiTagComponent {
     @Input()
     @HostBinding('attr.data-tui-host-status')
     @tuiDefaultProp()
-    status: TuiStatus = TuiStatus.Default;
+    status: TuiStatusT = 'default';
 
     @Input()
     @HostBinding('class._hoverable')
@@ -97,9 +100,6 @@ export class TuiTagComponent {
 
     editedText: string | null = null;
 
-    @HostBinding('attr.data-tui-host-mode')
-    mode: TuiBrightness | null = null;
-
     @ViewChild('input', {read: ElementRef})
     set input(input: ElementRef<HTMLInputElement>) {
         if (input) {
@@ -109,12 +109,8 @@ export class TuiTagComponent {
 
     constructor(
         @Inject(ElementRef) private readonly elementRef: ElementRef<HTMLElement>,
-        @Inject(TUI_MODE) mode$: Observable<TuiBrightness | null>,
-    ) {
-        mode$.subscribe(mode => {
-            this.mode = mode;
-        });
-    }
+        @Inject(TUI_MODE) readonly mode$: Observable<TuiBrightness | null>,
+    ) {}
 
     get backgroundColor(): string | null {
         return this.autoColor ? stringHashToHsl(this.value) : null;

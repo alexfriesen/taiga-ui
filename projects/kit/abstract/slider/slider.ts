@@ -11,6 +11,7 @@ import {NgControl} from '@angular/forms';
 import {
     AbstractTuiControl,
     clamp,
+    nonNegativeFiniteAssertion,
     quantize,
     round,
     setNativeFocused,
@@ -23,7 +24,7 @@ import {TuiPluralize, TuiSizeS, TuiWithOptionalMinMax} from '@taiga-ui/core';
 import {TUI_FLOATING_PRECISION} from '@taiga-ui/kit/constants';
 import {TUI_FROM_TO_TEXTS} from '@taiga-ui/kit/tokens';
 import {TuiKeySteps} from '@taiga-ui/kit/types';
-import {race, Subject} from 'rxjs';
+import {Observable, race, Subject} from 'rxjs';
 import {map, switchMap, takeUntil} from 'rxjs/operators';
 
 export const SLIDER_KEYBOARD_STEP = 0.05;
@@ -58,6 +59,10 @@ export abstract class AbstractTuiSlider<T>
     steps = 0;
 
     @Input()
+    @tuiDefaultProp(nonNegativeFiniteAssertion, 'Quantum must be a non-negative number')
+    quantum = 0;
+
+    @Input()
     @tuiDefaultProp()
     pluralize: TuiPluralize | null = null;
 
@@ -89,7 +94,8 @@ export abstract class AbstractTuiSlider<T>
         ngControl: NgControl | null,
         changeDetectorRef: ChangeDetectorRef,
         private readonly documentRef: Document,
-        @Inject(TUI_FROM_TO_TEXTS) private readonly fromToTexts: [string, string],
+        @Inject(TUI_FROM_TO_TEXTS)
+        readonly fromToTexts$: Observable<[string, string]>,
     ) {
         super(ngControl, changeDetectorRef);
     }
@@ -105,6 +111,14 @@ export abstract class AbstractTuiSlider<T>
 
     get length(): number {
         return this.max - this.min;
+    }
+
+    get computedStep(): number {
+        if (this.steps) {
+            return 1 / this.steps;
+        }
+
+        return this.quantum ? this.quantum / this.length : SLIDER_KEYBOARD_STEP;
     }
 
     get isLeftFocusable(): boolean {
@@ -230,16 +244,16 @@ export abstract class AbstractTuiSlider<T>
         return round(this.getValueFromFraction(segment / this.segments), 2);
     }
 
-    getSegmentPrefix(segment: number): string {
+    getSegmentPrefix(segment: number, texts: [string, string]): string {
         if (this.segments !== 1) {
             return '';
         }
 
         if (segment === 0) {
-            return `${this.fromToTexts[0]} `;
+            return `${texts[0]} `;
         }
 
-        return `${this.fromToTexts[1]} `;
+        return `${texts[1]} `;
     }
 
     onActiveZone(active: boolean) {
@@ -283,6 +297,19 @@ export abstract class AbstractTuiSlider<T>
         return this.getFractionFromEvents(rect, clientX);
     }
 
+    protected valueGuard(value: number): number {
+        return this.quantum
+            ? clamp(
+                  round(
+                      Math.round(value / this.quantum) * this.quantum,
+                      TUI_FLOATING_PRECISION,
+                  ),
+                  this.min,
+                  this.max,
+              )
+            : clamp(value, this.min, this.max);
+    }
+
     private processFocus(right: boolean) {
         if (!this.focusable || !this.dotRight || !this.dotLeft) {
             return;
@@ -296,11 +323,11 @@ export abstract class AbstractTuiSlider<T>
     }
 
     /**
-     * Функция для перевода заполненности слайдера в значение и наоборот
-     * с учётом шагов линейной зависимости.
+     * Function for converting the fullness of the slider to a value and vice versa
+     * taking into account the steps of linear dependence.
      *
-     * @param value переданное значение
-     * @param isFraction перевод осуществляется с заполненности на значение
+     * @param value passed value
+     * @param isFraction translation is carried out from fullness to value
      */
     private fractionValueKeyStepConverter(value: number, isFraction: boolean): number {
         const steps = [[0, this.min]].concat(this.keySteps as TuiKeySteps, [

@@ -1,9 +1,7 @@
 import {default as example1Html} from '!!raw-loader!./examples/1/index.html';
-import {default as example1Less} from '!!raw-loader!./examples/1/index.less';
 import {default as example1Ts} from '!!raw-loader!./examples/1/index.ts';
 
 import {default as example2Html} from '!!raw-loader!./examples/2/index.html';
-import {default as example2Less} from '!!raw-loader!./examples/2/index.less';
 import {default as example2Ts} from '!!raw-loader!./examples/2/index.ts';
 
 import {default as exampleDeclareForm} from '!!raw-loader!./examples/import/declare-form.txt';
@@ -21,7 +19,7 @@ import {
 import {
     DEFAULT_MAX_HEIGHT,
     DEFAULT_MIN_HEIGHT,
-    TuiDropdownWidth,
+    TuiDropdownWidthT,
     TuiSizeL,
     TuiSizeS,
     TuiVerticalDirection,
@@ -29,8 +27,8 @@ import {
 import {tuiCreateTimePeriods} from '@taiga-ui/kit';
 import {changeDetection} from '../../../change-detection-strategy';
 import {FrontEndExample} from '../../interfaces/front-end-example';
+import {AbstractExampleTuiControl} from '../abstract/control';
 import {ABSTRACT_PROPS_ACCESSOR} from '../abstract/inherited-documentation/abstract-props-accessor';
-import {AbstractExampleTuiReactiveField} from '../abstract/reactive-field';
 
 @Component({
     selector: 'example-tui-input-time',
@@ -43,7 +41,7 @@ import {AbstractExampleTuiReactiveField} from '../abstract/reactive-field';
         },
     ],
 })
-export class ExampleTuiInputTimeComponent extends AbstractExampleTuiReactiveField {
+export class ExampleTuiInputTimeComponent extends AbstractExampleTuiControl {
     readonly exampleImportModule = exampleImportModule;
     readonly exampleInsertTemplate = exampleInsertTemplate;
     readonly exampleDeclareForm = exampleDeclareForm;
@@ -51,13 +49,11 @@ export class ExampleTuiInputTimeComponent extends AbstractExampleTuiReactiveFiel
     readonly example1: FrontEndExample = {
         TypeScript: example1Ts,
         HTML: example1Html,
-        LESS: example1Less,
     };
 
     readonly example2: FrontEndExample = {
         TypeScript: example2Ts,
         HTML: example2Html,
-        LESS: example2Less,
     };
 
     cleaner = false;
@@ -73,12 +69,9 @@ export class ExampleTuiInputTimeComponent extends AbstractExampleTuiReactiveFiel
 
     disabledItemHandler = this.disabledItemHandlerVariants[0];
 
-    readonly dropdownLimitWidthVariants: ReadonlyArray<TuiDropdownWidth> = [
-        TuiDropdownWidth.Fixed,
-        TuiDropdownWidth.Min,
-    ];
+    readonly dropdownLimitWidthVariants: readonly TuiDropdownWidthT[] = ['fixed', 'min'];
 
-    dropdownLimitWidth: TuiDropdownWidth | null = this.dropdownLimitWidthVariants[0];
+    dropdownLimitWidth: TuiDropdownWidthT | null = this.dropdownLimitWidthVariants[0];
 
     readonly dropdownDirectionVariants: ReadonlyArray<TuiVerticalDirection> = [
         'top',
@@ -107,7 +100,7 @@ export class ExampleTuiInputTimeComponent extends AbstractExampleTuiReactiveFiel
     readonly modeVariants: ReadonlyArray<TuiTimeMode> = [
         'HH:MM',
         'HH:MM:SS',
-        'HH:MM:SS.MS',
+        'HH:MM:SS.MSS',
     ];
 
     mode = this.modeVariants[0];

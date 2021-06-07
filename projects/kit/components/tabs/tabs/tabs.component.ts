@@ -16,6 +16,10 @@ import {
     Renderer2,
 } from '@angular/core';
 import {
+    MUTATION_OBSERVER_INIT,
+    MutationObserverService,
+} from '@ng-web-apis/mutation-observer';
+import {
     EMPTY_QUERY,
     itemsQueryListObservable,
     moveFocus,
@@ -42,7 +46,17 @@ import {TAB_ACTIVE_CLASS} from '../tabs.const';
     host: {
         class: 'tui-zero-scrollbar',
     },
-    providers: [TuiDestroyService, TuiResizeService],
+    providers: [
+        TuiDestroyService,
+        TuiResizeService,
+        MutationObserverService,
+        {
+            provide: MUTATION_OBSERVER_INIT,
+            useValue: {
+                childList: true,
+            },
+        },
+    ],
 })
 export class TuiTabsComponent implements AfterViewChecked {
     @Input()
@@ -50,9 +64,11 @@ export class TuiTabsComponent implements AfterViewChecked {
     @tuiDefaultProp()
     underline = true;
 
-    @Input()
-    @tuiDefaultProp()
-    activeItemIndex = 0;
+    @Input('activeItemIndex')
+    set activeItemIndexSetter(index: number) {
+        this.activeItemIndex = index;
+        this.scrollTo(this.tabs[index]);
+    }
 
     @Output()
     readonly activeItemIndexChange = new EventEmitter<number>();
@@ -65,6 +81,8 @@ export class TuiTabsComponent implements AfterViewChecked {
 
     @ContentChildren(forwardRef(() => TuiTabComponent))
     private readonly children: QueryList<unknown> = EMPTY_QUERY;
+
+    activeItemIndex = 0;
 
     constructor(
         @Inject(ElementRef) private readonly elementRef: ElementRef<HTMLElement>,
@@ -89,11 +107,9 @@ export class TuiTabsComponent implements AfterViewChecked {
     }
 
     get tabs(): ReadonlyArray<HTMLElement> {
-        const tabs = Array.from(
-            this.elementRef.nativeElement.querySelectorAll('[tuiTab]'),
+        return Array.from(
+            this.elementRef.nativeElement.querySelectorAll<HTMLElement>('[tuiTab]'),
         );
-
-        return tabs as Array<HTMLElement>;
     }
 
     get activeElement(): HTMLElement | null {
@@ -122,7 +138,7 @@ export class TuiTabsComponent implements AfterViewChecked {
             return;
         }
 
-        this.activeItemIndex = index;
+        this.activeItemIndexSetter = index;
         this.activeItemIndexChange.emit(index);
     }
 
@@ -132,5 +148,26 @@ export class TuiTabsComponent implements AfterViewChecked {
         const {tabs} = this;
 
         moveFocus(tabs.indexOf(current), tabs, step);
+    }
+
+    private scrollTo(element?: HTMLElement) {
+        if (!element) {
+            return;
+        }
+
+        const {offsetLeft, offsetWidth} = element;
+        const {nativeElement} = this.elementRef;
+
+        if (offsetLeft < nativeElement.scrollLeft) {
+            nativeElement.scrollLeft = offsetLeft;
+        }
+
+        if (
+            offsetLeft + offsetWidth >
+            nativeElement.scrollLeft + nativeElement.offsetWidth
+        ) {
+            nativeElement.scrollLeft =
+                offsetLeft + offsetWidth - nativeElement.offsetWidth;
+        }
     }
 }

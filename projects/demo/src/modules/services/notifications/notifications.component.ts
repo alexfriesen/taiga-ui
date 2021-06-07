@@ -80,9 +80,13 @@ export class ExampleTuiNotificationsComponent {
 
     content = this.contentVariants[0];
 
-    autoClose = true;
+    readonly autoCloseVariants = [true, false, 5000, 1000, 500];
+
+    autoClose = this.autoCloseVariants[0];
 
     hasCloseButton = true;
+
+    hasIcon = true;
 
     readonly component: PolymorpheusComponent<
         AlertExampleWithDataComponent,
@@ -114,6 +118,7 @@ export class ExampleTuiNotificationsComponent {
                 status: this.status,
                 autoClose: this.autoClose,
                 hasCloseButton: this.hasCloseButton,
+                hasIcon: this.hasIcon,
             })
             .pipe(
                 switchMap(response =>

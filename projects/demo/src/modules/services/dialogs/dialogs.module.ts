@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {TuiMoneyModule} from '@taiga-ui/addon-commerce';
-import {generateRoutes, TUI_DOC_PAGE_MODULES} from '@taiga-ui/addon-doc';
+import {generateRoutes, TuiAddonDocModule} from '@taiga-ui/addon-doc';
 import {TuiPreventDefaultModule} from '@taiga-ui/cdk';
 import {
     TuiButtonModule,
@@ -18,8 +18,6 @@ import {
     TuiRadioListModule,
 } from '@taiga-ui/kit';
 import {PolymorpheusModule} from '@tinkoff/ng-polymorpheus';
-import {DialogExampleWithDataComponent} from './dialog-example-with-data/dialog-example-with-data.component';
-import {DialogExampleWithDataModule} from './dialog-example-with-data/dialog-example-with-data.module';
 import {DialogExampleComponent} from './dialog-example/dialog-example.component';
 import {DialogExampleModule} from './dialog-example/dialog-example.module';
 import {ExampleTuiDialogsComponent} from './dialogs.component';
@@ -45,8 +43,7 @@ import {TuiDialogExampleComponent5} from './examples/5';
         TuiPreventDefaultModule,
         TuiNotificationModule,
         DialogExampleModule,
-        DialogExampleWithDataModule,
-        ...TUI_DOC_PAGE_MODULES,
+        TuiAddonDocModule,
         RouterModule.forChild(generateRoutes(ExampleTuiDialogsComponent)),
     ],
     declarations: [
@@ -57,7 +54,7 @@ import {TuiDialogExampleComponent5} from './examples/5';
         TuiDialogExampleComponent4,
         TuiDialogExampleComponent5,
     ],
-    entryComponents: [DialogExampleComponent, DialogExampleWithDataComponent],
+    entryComponents: [DialogExampleComponent],
     exports: [ExampleTuiDialogsComponent],
 })
 export class ExampleTuiDialogsModule {}

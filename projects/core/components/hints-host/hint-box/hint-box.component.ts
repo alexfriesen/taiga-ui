@@ -19,8 +19,7 @@ import {
 } from '@taiga-ui/cdk';
 import {AbstractTuiHint} from '@taiga-ui/core/abstract';
 import {TuiPointerHintDirective} from '@taiga-ui/core/directives/pointer-hint';
-import {TuiHintMode} from '@taiga-ui/core/enums';
-import {TuiDirection} from '@taiga-ui/core/types';
+import {TuiDirection, TuiHintModeT} from '@taiga-ui/core/types';
 import {Observable} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {TuiHintsHostComponent} from '../hints-host.component';
@@ -49,7 +48,7 @@ const reverseDirectionsHorizontal: {[key in TuiDirection]: TuiDirection} = {
     right: 'left',
 };
 
-// TODO: consider abstracting UI and move to CDK
+// TODO: consider abstracting UI and move to CDK, split hint and overflow
 // Ambient type cannot be used without dynamic https://github.com/angular/angular/issues/23395
 // @dynamic
 @Component({
@@ -68,9 +67,9 @@ export class TuiHintBoxComponent {
     direction: TuiDirection = 'bottom-left';
 
     @Input()
-    @HostBinding('attr.data-tui-host-mode')
+    @HostBinding('attr.data-mode')
     @tuiDefaultProp()
-    mode: TuiHintMode | null = null;
+    mode: TuiHintModeT | null = null;
 
     @ViewChild('arrow')
     private readonly arrow?: ElementRef<HTMLElement>;
@@ -101,7 +100,7 @@ export class TuiHintBoxComponent {
      * Styles are set directly to avoid visual shake of element
      */
     private calculatePosition() {
-        if (this.mode !== TuiHintMode.Overflow) {
+        if (this.mode !== 'overflow') {
             this.calculateCoordinates();
         } else {
             this.setOverflowStyles();
@@ -116,7 +115,7 @@ export class TuiHintBoxComponent {
         }
 
         if (!this.hint) {
-            throw new Error('Hint directive is missing');
+            return;
         }
 
         const hostRect = this.hint.getElementClientRect();

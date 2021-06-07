@@ -5,6 +5,7 @@ import {default as example2Html} from '!!raw-loader!./examples/2/index.html';
 import {default as example2Ts} from '!!raw-loader!./examples/2/index.ts';
 
 import {default as exampleDeclareForm} from '!!raw-loader!./examples/import/declare-form.txt';
+import {default as exampleDefineOptions} from '!!raw-loader!./examples/import/define-options.txt';
 import {default as exampleImportModule} from '!!raw-loader!./examples/import/import-module.txt';
 import {default as exampleInsertTemplate} from '!!raw-loader!./examples/import/insert-template.txt';
 
@@ -15,7 +16,7 @@ import {changeDetection} from '../../../change-detection-strategy';
 import {HOW_TO_PATH_RESOLVER} from '../../../how-to-path-resolver';
 import {FrontEndExample} from '../../interfaces/front-end-example';
 import {ABSTRACT_PROPS_ACCESSOR} from '../abstract/inherited-documentation/abstract-props-accessor';
-import {AbstractExampleTuiReactiveField} from '../abstract/reactive-field';
+import {AbstractExampleTuiInteractive} from '../abstract/interactive';
 
 @Component({
     selector: 'example-tui-checkbox',
@@ -28,8 +29,9 @@ import {AbstractExampleTuiReactiveField} from '../abstract/reactive-field';
         },
     ],
 })
-export class ExampleTuiCheckboxComponent extends AbstractExampleTuiReactiveField {
+export class ExampleTuiCheckboxComponent extends AbstractExampleTuiInteractive {
     readonly exampleDeclareForm = exampleDeclareForm;
+    readonly exampleDefineOptions = exampleDefineOptions;
     readonly exampleImportModule = exampleImportModule;
     readonly exampleInsertTemplate = exampleInsertTemplate;
 

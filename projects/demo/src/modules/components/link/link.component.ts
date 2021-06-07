@@ -11,7 +11,7 @@ import {default as exampleImportModule} from '!!raw-loader!./examples/import/imp
 import {default as exampleInsertTemplate} from '!!raw-loader!./examples/import/insert-template.txt';
 
 import {Component} from '@angular/core';
-import {TuiHorizontalDirection, TuiLinkMode} from '@taiga-ui/core';
+import {TuiHorizontalDirection} from '@taiga-ui/core';
 import {changeDetection} from '../../../change-detection-strategy';
 import {FrontEndExample} from '../../interfaces/front-end-example';
 
@@ -42,18 +42,15 @@ export class ExampleTuiLinkComponent {
     pseudo = false;
     iconRotated = false;
 
-    readonly modeValues: ReadonlyArray<TuiLinkMode> = [
-        TuiLinkMode.Positive,
-        TuiLinkMode.Negative,
-    ];
+    readonly modeValues = ['positive', 'negative'] as const;
 
-    mode: TuiLinkMode | null = null;
+    mode: 'positive' | 'negative' | null = null;
 
     readonly iconAlignValues: ReadonlyArray<TuiHorizontalDirection> = ['right', 'left'];
 
     icon = null;
 
-    readonly iconVariants = ['tuiIconOkLarge', 'tuiIconInstagramLarge'];
+    readonly iconVariants = ['tuiIconStarLarge', 'tuiIconGeoLarge'];
 
     iconAlign: TuiHorizontalDirection = this.iconAlignValues[0];
 }

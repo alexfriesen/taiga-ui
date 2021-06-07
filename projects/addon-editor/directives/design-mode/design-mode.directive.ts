@@ -4,6 +4,7 @@ import {
     ElementRef,
     EventEmitter,
     forwardRef,
+    HostBinding,
     HostListener,
     Inject,
     Input,
@@ -15,17 +16,16 @@ import {
     SecurityContext,
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {DomSanitizer} from '@angular/platform-browser';
 import {TUI_EDITOR_STYLES, TUI_IMAGE_LOADER} from '@taiga-ui/addon-editor/tokens';
 import {tuiInsertHtml} from '@taiga-ui/addon-editor/utils';
 import {
     EMPTY_FUNCTION,
     getClipboardDataText,
-    getClosestKeyboardFocusable,
+    getClosestFocusable,
     isNativeFocused,
+    preventDefault,
     setNativeFocused,
     TUI_FOCUSABLE_ITEM_ACCESSOR,
-    TUI_SANITIZER,
     TuiDestroyService,
     TuiEventWith,
     TuiFocusableElementAccessor,
@@ -33,8 +33,11 @@ import {
     tuiRequiredSetter,
     typedFromEvent,
 } from '@taiga-ui/cdk';
+import {TUI_SANITIZER} from '@taiga-ui/core';
 import {merge, Observable} from 'rxjs';
-import {filter, mapTo, take, takeUntil} from 'rxjs/operators';
+import {filter, map, mapTo, take, takeUntil} from 'rxjs/operators';
+
+const PADDING = 26;
 
 @Directive({
     selector: 'iframe[tuiDesignMode]',
@@ -63,6 +66,9 @@ export class TuiDesignModeDirective
     @Output()
     readonly focusedChange = new EventEmitter<boolean>();
 
+    @HostBinding('style.pointerEvents')
+    pointerEvents = 'all';
+
     private onTouched = EMPTY_FUNCTION;
 
     private onChange = EMPTY_FUNCTION;
@@ -89,7 +95,7 @@ export class TuiDesignModeDirective
         private readonly styles: string,
         @Inject(TUI_IMAGE_LOADER)
         private readonly imageLoader: TuiHandler<File, Observable<string>>,
-        @Inject(DomSanitizer) private readonly sanitizer: DomSanitizer,
+        @Inject(Sanitizer) private readonly sanitizer: Sanitizer,
         @Optional()
         @Inject(TUI_SANITIZER)
         private readonly tuiSanitizer: Sanitizer | null,
@@ -126,6 +132,12 @@ export class TuiDesignModeDirective
         this.initDOM();
         this.initObserver();
         this.initSubscriptions();
+    }
+
+    @HostListener('document:mousedown', ['"none"'])
+    @HostListener('document:mouseup', ['"all"'])
+    onPointer(pointerEvents: 'all' | 'none') {
+        this.pointerEvents = pointerEvents;
     }
 
     writeValue(value: string) {
@@ -212,7 +224,7 @@ export class TuiDesignModeDirective
 
                 event.preventDefault();
 
-                const element = getClosestKeyboardFocusable(
+                const element = getClosestFocusable(
                     this.elementRef.nativeElement,
                     event.shiftKey,
                     this.elementRef.nativeElement.ownerDocument.body,
@@ -253,13 +265,11 @@ export class TuiDesignModeDirective
                         !event.clipboardData ||
                         event.clipboardData.types.indexOf('Files') === -1,
                 ),
+                preventDefault(),
+                map(event => this.sanitize(getClipboardDataText(event, 'text/html'))),
             )
-            .subscribe(event => {
-                event.preventDefault();
-                tuiInsertHtml(
-                    this.computedDocument,
-                    this.sanitize(getClipboardDataText(event, 'text/html')),
-                );
+            .subscribe(html => {
+                tuiInsertHtml(this.computedDocument, html);
             });
     }
 
@@ -274,9 +284,9 @@ export class TuiDesignModeDirective
                     } => !!event.dataTransfer,
                 ),
                 takeUntil(this.destroy$),
+                preventDefault(),
             )
             .subscribe(event => {
-                event.preventDefault();
                 this.setSelectionAt(event.x, event.y);
 
                 if (
@@ -344,11 +354,18 @@ export class TuiDesignModeDirective
     }
 
     private updateHeight() {
-        this.renderer.setAttribute(this.elementRef.nativeElement, 'height', '0');
+        if (!this.documentRef) {
+            return;
+        }
+
+        const range = this.documentRef.createRange();
+
+        range.selectNodeContents(this.documentRef.body);
+
         this.renderer.setAttribute(
             this.elementRef.nativeElement,
             'height',
-            this.documentRef ? String(this.documentRef.body.offsetHeight) : '',
+            String(range.getBoundingClientRect().height + PADDING),
         );
     }
 

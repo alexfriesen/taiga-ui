@@ -1,8 +1,8 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TuiSizeL} from '@taiga-ui/core';
+import {TuiStatusT} from '@taiga-ui/kit/types';
 import {configureTestSuite} from 'ng-bullet';
-import {TuiStatus} from '../../../enums/status';
 import {TuiBadgeComponent} from '../badge.component';
 import {TuiBadgeModule} from '../badge.module';
 
@@ -21,7 +21,7 @@ describe('Badge', () => {
 
         size: TuiSizeL = 'm';
         value: number | string;
-        status = TuiStatus.Default;
+        status: TuiStatusT = 'default';
     }
 
     let fixture: ComponentFixture<TestComponent>;
@@ -43,48 +43,70 @@ describe('Badge', () => {
     });
 
     describe('value:', () => {
-        it('если принимает двузначное число, выводит его', () => {
+        it('if it accepts a two-digit number, it outputs it', () => {
             testComponent.value = 99;
             fixture.detectChanges();
 
-            expect(testComponent.element.nativeElement.textContent).toEqual('99');
+            expect(testComponent.element.nativeElement.textContent!.trim()).toEqual('99');
         });
 
-        it('если принимает трехзначное и более, выводит сокращение 99+', () => {
+        it('if it takes three digits or more, it displays the abbreviation 99+', () => {
             testComponent.value = 999;
             fixture.detectChanges();
 
-            expect(testComponent.element.nativeElement.textContent).toEqual('99+');
+            expect(testComponent.element.nativeElement.textContent!.trim()).toEqual(
+                '99+',
+            );
         });
 
-        it('если принимает строку, выводит её', () => {
-            testComponent.value = 'Текст';
+        it('if it accepts a string, it outputs it', () => {
+            testComponent.value = 'Text';
             fixture.detectChanges();
 
-            expect(testComponent.element.nativeElement.textContent).toEqual('Текст');
+            expect(testComponent.element.nativeElement.textContent!.trim()).toEqual(
+                'Text',
+            );
         });
 
-        it('если принимает строку, содержащую число, выводит её в неизменном виде', () => {
+        it('if it accepts a string containing a number, it outputs it unchanged', () => {
             testComponent.value = '125';
             fixture.detectChanges();
 
-            expect(testComponent.element.nativeElement.textContent).toEqual('125');
+            expect(testComponent.element.nativeElement.textContent!.trim()).toEqual(
+                '125',
+            );
         });
     });
 
     describe('padding:', () => {
-        it('если значение – число, у padding размер m', () => {
+        it('if value is a number, padding has size m', () => {
             testComponent.value = 99;
             fixture.detectChanges();
 
             expect(component.padding).toBe('m');
         });
 
-        it('если значение – строка, у padding размер l', () => {
+        it('if value is a string, padding has size l', () => {
             testComponent.value = '99';
             fixture.detectChanges();
 
             expect(component.padding).toBe('l');
+        });
+
+        it('if value is empty, padding is none', () => {
+            expect(component.padding).toBe('none');
+        });
+    });
+
+    describe('states: ', () => {
+        it('if value is empty, add appropriate css class', () => {
+            testComponent.value = '';
+
+            fixture.detectChanges();
+
+            expect(
+                testComponent.element.nativeElement.classList.contains('_empty-value'),
+            ).toBeTruthy();
         });
     });
 });

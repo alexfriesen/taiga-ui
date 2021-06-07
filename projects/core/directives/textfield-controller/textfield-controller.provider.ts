@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, InjectionToken, Provider} from '@angular/core';
 import {TuiDestroyService, watch} from '@taiga-ui/cdk';
-import {merge, Observable} from 'rxjs';
+import {merge, NEVER, Observable} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {
     TUI_TEXTFIELD_AUTOCOMPLETE,
@@ -34,7 +34,7 @@ import {TUI_TEXTFIELD_SIZE, TuiTextfieldSizeDirective} from './textfield-size.di
 import {TUI_TEXTFIELD_TYPE, TuiTextfieldTypeDirective} from './textfield-type.directive';
 import {TuiTextfieldController} from './textfield.controller';
 
-export const TUI_TEXTIFELD_WATCHED_CONTROLLER = new InjectionToken<TuiTextfieldController>(
+export const TUI_TEXTFIELD_WATCHED_CONTROLLER = new InjectionToken<TuiTextfieldController>(
     'watched textfield controller',
 );
 
@@ -54,7 +54,7 @@ export function textfieldWatchedControllerFactory(
         TuiTextfieldTypeDirective,
     ]
 ): TuiTextfieldController {
-    const change$ = merge(...controllers.map(({change$}) => change$)).pipe(
+    const change$ = merge(...controllers.map(({change$}) => change$ || NEVER)).pipe(
         watch(changeDetectorRef),
         takeUntil(destroy$),
     );
@@ -67,7 +67,7 @@ export function textfieldWatchedControllerFactory(
 export const TEXTFIELD_CONTROLLER_PROVIDER: Provider = [
     TuiDestroyService,
     {
-        provide: TUI_TEXTIFELD_WATCHED_CONTROLLER,
+        provide: TUI_TEXTFIELD_WATCHED_CONTROLLER,
         deps: [
             ChangeDetectorRef,
             TuiDestroyService,

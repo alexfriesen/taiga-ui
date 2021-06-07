@@ -25,14 +25,13 @@ import {
     HINT_CONTROLLER_PROVIDER,
     TEXTFIELD_CONTROLLER_PROVIDER,
     TUI_HINT_WATCHED_CONTROLLER,
-    TUI_TEXTIFELD_WATCHED_CONTROLLER,
-    TuiAppearance,
+    TUI_TEXTFIELD_APPEARANCE,
+    TUI_TEXTFIELD_WATCHED_CONTROLLER,
     TuiBrightness,
     TuiHintControllerDirective,
     TuiModeDirective,
     TuiSizeL,
     TuiSizeS,
-    TuiTableModeDirective,
     TuiTextfieldController,
 } from '@taiga-ui/core';
 
@@ -78,14 +77,12 @@ export class TuiTextAreaComponent
         @Inject(NgControl)
         control: NgControl | null,
         @Inject(ChangeDetectorRef) changeDetectorRef: ChangeDetectorRef,
-        @Optional()
-        @Inject(TuiTableModeDirective)
-        private readonly tableMode: TuiTableModeDirective | null,
+        @Inject(TUI_TEXTFIELD_APPEARANCE) readonly appearance: string,
         @Inject(TUI_IS_IOS) isIOS: boolean,
         @Optional()
         @Inject(TuiModeDirective)
         private readonly modeDirective: TuiModeDirective | null,
-        @Inject(TUI_TEXTIFELD_WATCHED_CONTROLLER)
+        @Inject(TUI_TEXTFIELD_WATCHED_CONTROLLER)
         readonly controller: TuiTextfieldController,
         @Inject(TUI_HINT_WATCHED_CONTROLLER)
         readonly hintController: TuiHintControllerDirective,
@@ -93,6 +90,11 @@ export class TuiTextAreaComponent
         super(control, changeDetectorRef);
 
         this.isIOS = isIOS;
+    }
+
+    @HostBinding('class._label-outside')
+    get labelOutside(): boolean {
+        return this.controller.labelOutside;
     }
 
     get nativeFocusableElement(): HTMLTextAreaElement | null {
@@ -142,13 +144,9 @@ export class TuiTextAreaComponent
         return this.expandable ? this.rows * this.lineHeight : null;
     }
 
-    @HostBinding('attr.data-tui-host-mode')
+    @HostBinding('attr.data-mode')
     get hostMode(): TuiBrightness | null {
         return this.modeDirective && this.modeDirective.mode;
-    }
-
-    get appearance(): TuiAppearance {
-        return this.tableMode ? TuiAppearance.Table : TuiAppearance.Textfield;
     }
 
     get placeholderRaised(): boolean {

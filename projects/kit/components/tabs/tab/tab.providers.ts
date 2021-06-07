@@ -1,16 +1,17 @@
 import {DOCUMENT} from '@angular/common';
-import {ChangeDetectorRef, ElementRef, InjectionToken, Provider} from '@angular/core';
+import {ElementRef, InjectionToken, Optional, Provider} from '@angular/core';
+import {RouterLinkActive} from '@angular/router';
+import {MutationObserverService} from '@ng-web-apis/mutation-observer';
 import {
     identity,
     tuiCustomEvent,
     TuiDestroyService,
     TuiFocusVisibleService,
     typedFromEvent,
-    watch,
 } from '@taiga-ui/cdk';
 import {MODE_PROVIDER, TuiRouterLinkActiveService} from '@taiga-ui/core';
-import {merge, Observable} from 'rxjs';
-import {filter, mapTo, takeUntil} from 'rxjs/operators';
+import {EMPTY, merge, Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
 export const TUI_TAB_ACTIVATE = 'tui-tab-activate';
 export const TUI_TAB_EVENT = new InjectionToken<Observable<Event>>(
@@ -26,8 +27,8 @@ export const TUI_TAB_PROVIDERS: Provider[] = [
             ElementRef,
             DOCUMENT,
             TuiRouterLinkActiveService,
-            TuiDestroyService,
-            ChangeDetectorRef,
+            MutationObserverService,
+            [new Optional(), RouterLinkActive],
         ],
         useFactory: tabActiveFactory,
     },
@@ -38,15 +39,22 @@ export function tabActiveFactory(
     {nativeElement}: ElementRef<HTMLElement>,
     documentRef: Document,
     routerLinkActiveService: Observable<boolean>,
-    destroy$: Observable<void>,
-    changeDetectorRef: ChangeDetectorRef,
-): Observable<Event> {
+    mutationObserverService: MutationObserverService,
+    routerLinkActive: RouterLinkActive,
+): Observable<unknown> {
+    const mutationObserver = routerLinkActive
+        ? mutationObserverService.pipe(filter(() => routerLinkActive.isActive))
+        : EMPTY;
+
     return merge(
+        mutationObserver,
         routerLinkActiveService.pipe(filter(identity)),
-        typedFromEvent(nativeElement, 'click'),
+        nativeElement.matches('button') ? typedFromEvent(nativeElement, 'click') : EMPTY,
     ).pipe(
-        takeUntil(destroy$),
-        watch(changeDetectorRef),
-        mapTo(tuiCustomEvent(TUI_TAB_ACTIVATE, {bubbles: true}, documentRef)),
+        map(() =>
+            nativeElement.dispatchEvent(
+                tuiCustomEvent(TUI_TAB_ACTIVATE, {bubbles: true}, documentRef),
+            ),
+        ),
     );
 }

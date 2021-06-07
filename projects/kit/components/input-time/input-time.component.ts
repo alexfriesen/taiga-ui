@@ -3,6 +3,7 @@ import {
     ChangeDetectorRef,
     Component,
     forwardRef,
+    HostListener,
     Inject,
     Input,
     Optional,
@@ -40,6 +41,8 @@ import {
     tuiCreateAutoCorrectedTimePipe,
     tuiCreateTimeMask,
 } from '@taiga-ui/kit/utils/mask';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 // @dynamic
 @Component({
@@ -91,7 +94,8 @@ export class TuiInputTimeComponent
         @Inject(ChangeDetectorRef) changeDetectorRef: ChangeDetectorRef,
         @Inject(TUI_TEXTFIELD_SIZE)
         private readonly textfieldSize: TuiTextfieldSizeDirective,
-        @Inject(TUI_TIME_TEXTS) private readonly timeTexts: Record<TuiTimeMode, string>,
+        @Inject(TUI_TIME_TEXTS)
+        private readonly timeTexts$: Observable<Record<TuiTimeMode, string>>,
     ) {
         super(control, changeDetectorRef);
     }
@@ -108,10 +112,6 @@ export class TuiInputTimeComponent
         return this.filter(this.items, this.mode, this.computedSearch);
     }
 
-    get filler(): string {
-        return this.timeTexts[this.mode];
-    }
-
     get textMaskOptions(): TuiTextMaskOptions {
         return this.calculateMask(this.mode);
     }
@@ -121,7 +121,7 @@ export class TuiInputTimeComponent
     }
 
     get computedSearch(): string {
-        return this.computedValue.length !== this.filler.length ? this.computedValue : '';
+        return this.computedValue.length !== this.mode.length ? this.computedValue : '';
     }
 
     get interactive(): boolean {
@@ -156,11 +156,16 @@ export class TuiInputTimeComponent
         this.nativeFocusableElement.value = value;
     }
 
+    @tuiPure
+    getFiller$(mode: TuiTimeMode): Observable<string> {
+        return this.timeTexts$.pipe(map(texts => texts[mode]));
+    }
+
     onValueChange(value: string) {
         this.open = !!this.items.length;
 
-        if (value && this.control) {
-            this.control.updateValueAndValidity();
+        if (this.control) {
+            this.control.updateValueAndValidity({emitEvent: false});
         }
 
         const match = this.getMatch(value);
@@ -171,7 +176,7 @@ export class TuiInputTimeComponent
             return;
         }
 
-        if (value.length !== this.filler.length) {
+        if (value.length !== this.mode.length) {
             this.updateValue(null);
 
             return;
@@ -223,6 +228,11 @@ export class TuiInputTimeComponent
         }
 
         this.processArrow(event, -1);
+    }
+
+    @HostListener('click')
+    onClick() {
+        this.open = !this.open;
     }
 
     onMenuClick(item: TuiTime) {

@@ -1,6 +1,6 @@
-<!-- TODO: repair -->
 <tui-hosted-dropdown
     class="hosted"
+    [canOpen]="canOpen"
     [content]="datalist || ''"
     [(open)]="open"
     (tuiActiveZoneChange)="onActiveZone($event)"
@@ -41,8 +41,8 @@
                 </div>
                 <tui-scrollbar
                     *ngIf="!expandable; else items"
-                    mode="hidden"
                     class="scrollbar"
+                    [hidden]="true"
                 >
                     <ng-container *ngTemplateOutlet="items"></ng-container>
                 </tui-scrollbar>
@@ -124,6 +124,8 @@
                     [direction]="hintController.direction"
                     [mode]="hintController.mode"
                     [content]="hintController.content"
+                    [showDelay]="hintController.showDelay"
+                    [hideDelay]="hintController.hideDelay"
                 ></tui-tooltip>
                 <tui-svg
                     *ngIf="iconAlignRight"

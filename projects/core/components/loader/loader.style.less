@@ -1,4 +1,4 @@
-@import '../../styles/basic/basic-imports';
+@import '../../styles/taiga-ui-local.less';
 
 @size-xs: 12px;
 @size-s: 16px;
@@ -79,7 +79,7 @@
     align-self: center;
     color: var(--tui-text-01);
     stroke: var(--tui-primary);
-    animation: tuiFadeIn 0.3s;
+    animation: tuiFadeIn var(--tui-duration);
 
     &&_horizontal {
         flex-direction: row;

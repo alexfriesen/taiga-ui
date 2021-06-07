@@ -2,8 +2,10 @@ import {Component, DebugElement, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {TuiContextWithImplicit} from '@taiga-ui/cdk';
 import {TuiSizeL, TuiSizeS, TuiTextfieldControllerModule} from '@taiga-ui/core';
 import {PageObject} from '@taiga-ui/testing';
+import {PolymorpheusHandler} from '@tinkoff/ng-polymorpheus';
 import {configureTestSuite} from 'ng-bullet';
 import {TuiInputPasswordComponent} from '../input-password.component';
 import {TuiInputPasswordModule} from '../input-password.module';
@@ -36,6 +38,12 @@ describe('InputPassword', () => {
         return pageObject.getByAutomationId(`tui-password__icon`);
     }
 
+    function getIconScr(): string {
+        return (component.icon as PolymorpheusHandler<
+            TuiContextWithImplicit<TuiSizeS | TuiSizeL>
+        >)(component.context) as string;
+    }
+
     configureTestSuite(() => {
         TestBed.configureTestingModule({
             imports: [
@@ -57,51 +65,51 @@ describe('InputPassword', () => {
         fixture.detectChanges();
     });
 
-    describe('Поведение иконки "Показать пароль"', () => {
-        it('Изначально она присутствует и представляет собой "Закрытый глаз"', () => {
+    describe('Behavior of the Show Password icon"', () => {
+        it('It is initially present and represents the "Closed Eye"', () => {
             const icon = getIcon();
-            const iconSrc = component.icon;
+            const iconSrc = getIconScr();
 
             expect(icon).not.toBeNull();
             expect(iconSrc).toBe('tuiIconHideLarge');
         });
 
-        it('При клике на нее иконка представляет собой "Открытый глаз"', () => {
+        it('When you click on it, the icon represents "Open eye"', () => {
             const icon = getIcon();
 
             icon!.nativeElement.click();
 
-            const iconSrc = component.icon;
+            const iconSrc = getIconScr();
 
             expect(icon).not.toBeNull();
             expect(iconSrc).toBe('tuiIconShowLarge');
         });
 
-        it('В маленьком размере иконки маленькие', () => {
+        it('Small icons are small', () => {
             testComponent.size = 's';
             fixture.detectChanges();
 
             const icon = getIcon();
-            let iconSrc = component.icon;
+            let iconSrc = getIconScr();
 
             expect(iconSrc).toBe('tuiIconEyeClosed');
 
             icon!.nativeElement.click();
 
-            iconSrc = component.icon;
+            iconSrc = getIconScr();
 
             expect(icon).not.toBeNull();
             expect(iconSrc).toBe('tuiIconEyeOpen');
         });
 
-        it('Если readOnly - иконки нет', () => {
+        it('If readOnly - no icon', () => {
             testComponent.readOnly = true;
             fixture.detectChanges();
 
             expect(getIcon()).toBeNull();
         });
 
-        it('Если disabled - иконки нет', () => {
+        it('If disabled - no icon', () => {
             testComponent.control.disable();
             fixture.detectChanges();
 
@@ -109,14 +117,14 @@ describe('InputPassword', () => {
         });
     });
 
-    describe('Видимость введенного в поле', () => {
-        it('Изначально поле type="password", поэтому при вводе видно только точки', () => {
+    describe('Field visibility', () => {
+        it('Initially, the field is type = "password", so only dots are visible when entering', () => {
             const inputType = component.inputType;
 
             expect(inputType).toBe('password');
         });
 
-        it('При клике на иконку "Показать пароль" поле становится type="text"', () => {
+        it('When you click on the "Show password" icon, the field becomes type = "text"', () => {
             getIcon()!.nativeElement.click();
 
             const inputType = component.inputType;
@@ -124,7 +132,7 @@ describe('InputPassword', () => {
             expect(inputType).toBe('text');
         });
 
-        it('При readOnly поле type="password"', () => {
+        it('With readOnly, the type field="password"', () => {
             testComponent.readOnly = true;
             fixture.detectChanges();
 
@@ -133,7 +141,7 @@ describe('InputPassword', () => {
             expect(inputType).toBe('password');
         });
 
-        it('При disabled поле type="password"', () => {
+        it('When the field is disabled type="password"', () => {
             testComponent.control.disable();
             fixture.detectChanges();
 

@@ -1,14 +1,14 @@
 import {Component, forwardRef, Inject} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {changeDetection} from '../../../change-detection-strategy';
-import {AbstractExampleTuiReactiveField} from '../../components/abstract/reactive-field';
+import {AbstractExampleTuiControl} from '../../components/abstract/control';
 
 import {default as exampleImportModule} from '!!raw-loader!./examples/import/import-module.txt';
 import {default as exampleInsertTemplate} from '!!raw-loader!./examples/import/insert-template.txt';
 
 import {default as example1Html} from '!!raw-loader!./examples/1/index.html';
 import {default as example1Ts} from '!!raw-loader!./examples/1/index.ts';
-import {LogService} from '../../app/log.service';
+import {TuiNotificationsService} from '@taiga-ui/core';
 import {ABSTRACT_PROPS_ACCESSOR} from '../../components/abstract/inherited-documentation/abstract-props-accessor';
 import {FrontEndExample} from '../../interfaces/front-end-example';
 
@@ -18,14 +18,13 @@ import {FrontEndExample} from '../../interfaces/front-end-example';
     styleUrls: ['./input-card-grouped.style.less'],
     changeDetection,
     providers: [
-        LogService,
         {
             provide: ABSTRACT_PROPS_ACCESSOR,
             useExisting: forwardRef(() => ExampleTuiInputCardGroupedComponent),
         },
     ],
 })
-export class ExampleTuiInputCardGroupedComponent extends AbstractExampleTuiReactiveField {
+export class ExampleTuiInputCardGroupedComponent extends AbstractExampleTuiControl {
     readonly exampleImportModule = exampleImportModule;
 
     readonly exampleInsertTemplate = exampleInsertTemplate;
@@ -58,7 +57,10 @@ export class ExampleTuiInputCardGroupedComponent extends AbstractExampleTuiReact
 
     control = new FormControl();
 
-    constructor(@Inject(LogService) private readonly log: LogService) {
+    constructor(
+        @Inject(TuiNotificationsService)
+        private readonly notifications: TuiNotificationsService,
+    ) {
         super();
     }
 
@@ -69,6 +71,6 @@ export class ExampleTuiInputCardGroupedComponent extends AbstractExampleTuiReact
     }
 
     onBinChange(bin: string) {
-        this.log.log(`bin: ${bin}`);
+        this.notifications.show(`bin: ${bin}`).subscribe();
     }
 }

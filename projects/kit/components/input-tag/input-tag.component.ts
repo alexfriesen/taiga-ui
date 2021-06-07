@@ -41,8 +41,8 @@ import {
     TEXTFIELD_CONTROLLER_PROVIDER,
     TUI_DATA_LIST_HOST,
     TUI_HINT_WATCHED_CONTROLLER,
-    TUI_TEXTIFELD_WATCHED_CONTROLLER,
-    TuiAppearance,
+    TUI_TEXTFIELD_APPEARANCE,
+    TUI_TEXTFIELD_WATCHED_CONTROLLER,
     TuiDataListDirective,
     TuiDataListHost,
     TuiHintControllerDirective,
@@ -52,12 +52,12 @@ import {
     TuiScrollbarComponent,
     TuiSizeL,
     TuiSizeS,
-    TuiTableModeDirective,
     TuiTextfieldController,
 } from '@taiga-ui/core';
 import {ALLOWED_SPACE_REGEXP} from '@taiga-ui/kit/components/tag';
-import {TuiStatus} from '@taiga-ui/kit/enums';
 import {FIXED_DROPDOWN_CONTROLLER_PROVIDER} from '@taiga-ui/kit/providers';
+import {TUI_TAG_STATUS} from '@taiga-ui/kit/tokens';
+import {TuiStatusT} from '@taiga-ui/kit/types';
 import {PolymorpheusContent} from '@tinkoff/ng-polymorpheus';
 import {merge, Subject} from 'rxjs';
 import {filter, map, mapTo, switchMap, takeUntil} from 'rxjs/operators';
@@ -166,6 +166,9 @@ export class TuiInputTagComponent
     @ViewChild('cleaner', {read: ElementRef})
     private readonly cleanerSvg?: ElementRef<HTMLElement>;
 
+    @ViewChild(TuiScrollbarComponent, {read: ElementRef})
+    private readonly scrollBar?: ElementRef<HTMLElement>;
+
     constructor(
         @Optional()
         @Self()
@@ -174,15 +177,14 @@ export class TuiInputTagComponent
         @Inject(ChangeDetectorRef) changeDetectorRef: ChangeDetectorRef,
         @Inject(TuiScrollService) private tuiScrollService: TuiScrollService,
         @Inject(ElementRef) private readonly elementRef: ElementRef<HTMLElement>,
-        @Optional()
-        @Inject(TuiTableModeDirective)
-        private readonly tableMode: TuiTableModeDirective | null,
+        @Inject(TUI_TEXTFIELD_APPEARANCE) readonly appearance: string,
         @Optional()
         @Inject(TuiModeDirective)
         private readonly modeDirective: TuiModeDirective | null,
+        @Inject(TUI_TAG_STATUS) private readonly tagStatus: TuiStatusT,
         @Inject(TUI_HINT_WATCHED_CONTROLLER)
         readonly hintController: TuiHintControllerDirective,
-        @Inject(TUI_TEXTIFELD_WATCHED_CONTROLLER)
+        @Inject(TUI_TEXTFIELD_WATCHED_CONTROLLER)
         readonly controller: TuiTextfieldController,
     ) {
         super(control, changeDetectorRef);
@@ -261,14 +263,12 @@ export class TuiInputTagComponent
         return this.hasCleaner || this.hasTooltip || this.iconAlignRight;
     }
 
-    get status(): TuiStatus {
-        return this.modeDirective && this.modeDirective.mode
-            ? TuiStatus.Default
-            : TuiStatus.Primary;
+    get status(): TuiStatusT {
+        return this.modeDirective && this.modeDirective.mode ? 'default' : this.tagStatus;
     }
 
-    get appearance(): TuiAppearance {
-        return this.tableMode ? TuiAppearance.Table : TuiAppearance.Textfield;
+    get canOpen(): boolean {
+        return !this.computedDisabled && !this.readOnly && !!this.datalist;
     }
 
     getLeftContent(tag: string): PolymorpheusContent | null {
@@ -284,16 +284,11 @@ export class TuiInputTagComponent
     }
 
     onActiveZone(active: boolean) {
-        this.updateFocused(active);
-
-        if (active) {
-            return;
-        }
-
         this.open = false;
         this.addTag();
+        this.updateFocused(active);
 
-        if (!this.pseudoFocused) {
+        if (!this.computedFocused) {
             this.scrollToStart$.next();
         }
     }
@@ -344,11 +339,7 @@ export class TuiInputTagComponent
             return;
         }
 
-        const tag = this.tags.find((_item, index) => index === currentIndex - 1);
-
-        if (tag) {
-            setNativeFocused(tag.nativeElement);
-        }
+        this.onScrollKeyDown(currentIndex, -1);
     }
 
     onTagKeyDownArrowRight(currentIndex: number) {
@@ -358,11 +349,7 @@ export class TuiInputTagComponent
             return;
         }
 
-        const tag = this.tags.find((_item, index) => index === currentIndex + 1);
-
-        if (tag) {
-            setNativeFocused(tag.nativeElement);
-        }
+        this.onScrollKeyDown(currentIndex, 1);
     }
 
     onTagEdited(value: string, editedTag: string) {
@@ -418,6 +405,26 @@ export class TuiInputTagComponent
     setDisabledState() {
         super.setDisabledState();
         this.open = false;
+    }
+
+    private onScrollKeyDown(currentIndex: number, flag: number) {
+        const tag = this.tags.find((_item, index) => index === currentIndex + flag);
+
+        if (!tag || !this.scrollBar) {
+            return;
+        }
+
+        setNativeFocused(tag.nativeElement);
+
+        if (
+            flag * this.scrollBar.nativeElement.clientWidth -
+                flag * tag.nativeElement.offsetLeft -
+                tag.nativeElement.clientWidth <
+            0
+        ) {
+            this.scrollBar.nativeElement.scrollLeft +=
+                flag * tag.nativeElement.clientWidth;
+        }
     }
 
     private initScrollerSubscrition(scroller: TuiScrollbarComponent | null) {

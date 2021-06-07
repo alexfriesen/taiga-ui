@@ -6,7 +6,6 @@ import {
     ElementRef,
     Injector,
     Input,
-    NgModule,
     OnDestroy,
 } from '@angular/core';
 import {
@@ -17,17 +16,18 @@ import {
 } from '@taiga-ui/cdk';
 import {TuiDropdownBoxComponent} from '@taiga-ui/core/components/dropdown-box';
 import {DEFAULT_MAX_HEIGHT, DEFAULT_MIN_HEIGHT} from '@taiga-ui/core/constants';
-import {TuiDropdownWidth} from '@taiga-ui/core/enums';
 import {TuiDropdown} from '@taiga-ui/core/interfaces';
-import {TuiHorizontalDirection, TuiVerticalDirection} from '@taiga-ui/core/types';
+import {
+    TuiDropdownWidthT,
+    TuiHorizontalDirection,
+    TuiVerticalDirection,
+} from '@taiga-ui/core/types';
 import {checkFixedPosition} from '@taiga-ui/core/utils/dom';
 import {PolymorpheusContent} from '@tinkoff/ng-polymorpheus';
 import {Observable} from 'rxjs';
 
 // @bad TODO: Possibly refactor to make more abstract
-@Directive({
-    selector: 'never-gonna-make-you-cry',
-})
+@Directive()
 export abstract class AbstractTuiDropdown
     implements TuiDropdown, AfterViewChecked, OnDestroy {
     @Input('tuiDropdownContent')
@@ -60,7 +60,7 @@ export abstract class AbstractTuiDropdown
 
     @Input('tuiDropdownLimitWidth')
     @tuiDefaultProp()
-    limitMinWidth = TuiDropdownWidth.Min;
+    limitMinWidth: TuiDropdownWidthT = 'min';
 
     dropdownBoxRef: ComponentRef<TuiDropdownBoxComponent> | null = null;
 
@@ -121,7 +121,3 @@ export abstract class AbstractTuiDropdown
         this.dropdownBoxRef = null;
     }
 }
-
-// TODO: @bad this is a must for Ivy at the moment
-@NgModule({declarations: [AbstractTuiDropdown as any]})
-export class NeverGonnaSayGoodbyeModule {}

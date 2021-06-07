@@ -2,25 +2,24 @@
 
 @height: 108px;
 @heightCounter: 126px;
-@padding: 0 16px;
 @margin: 7px;
 
 :host {
-    .text-body-m();
+    font: var(--tui-font-text-m);
     position: relative;
     z-index: 0;
     display: flex;
     flex-direction: column;
     min-height: @height;
-    border-radius: var(--tui-radius);
+    border-radius: var(--tui-radius-m);
     color: var(--tui-text-01);
 
-    &[data-tui-host-mode='onDark'] {
+    &[data-mode='onDark'] {
         color: var(--tui-base-01);
     }
 
     &[data-tui-host-size='m'] {
-        .text-body-s();
+        font: var(--tui-font-text-s);
         min-height: @height - 20px;
     }
 
@@ -75,22 +74,20 @@
     padding-bottom: @margin;
     box-sizing: border-box;
 
-    :host[data-tui-host-size='m']._focused &,
-    :host[data-tui-host-size='m']._has-value & {
-        padding-top: 20px;
-    }
-
-    :host[data-tui-host-size='l']._focused &,
-    :host[data-tui-host-size='l']._has-value & {
-        padding-top: 25px;
-    }
-
     :host[data-tui-host-size='m']._label-outside & {
-        padding-top: 15px;
+        padding-top: 12px;
     }
 
     :host[data-tui-host-size='l']._label-outside & {
         padding-top: 16px;
+    }
+
+    :host[data-tui-host-size='m']:not(._label-outside) & {
+        padding-top: 22px;
+    }
+
+    :host[data-tui-host-size='l']:not(._label-outside) & {
+        padding-top: 26px;
     }
 }
 
@@ -120,12 +117,19 @@
 }
 
 .pseudo-content {
-    padding: @padding;
     white-space: pre-wrap;
     word-wrap: break-word;
     pointer-events: none;
     visibility: hidden;
     overflow: hidden;
+
+    :host[data-tui-host-size='m'] & {
+        padding: 0 12px;
+    }
+
+    :host[data-tui-host-size='l'] & {
+        padding: 0 16px;
+    }
 
     :host._focused._has-tooltip &,
     :host._has-value._has-tooltip & {
@@ -140,13 +144,20 @@
     left: 0;
     width: 100%;
     box-sizing: border-box;
-    padding: @padding;
     height: 100%;
     resize: none;
     overflow: hidden;
 
     &:focus {
         outline: none;
+    }
+
+    :host[data-tui-host-size='m'] & {
+        padding: 0 12px;
+    }
+
+    :host[data-tui-host-size='l'] & {
+        padding: 0 16px;
     }
 
     :host._focused._has-tooltip &,
@@ -158,7 +169,7 @@
         padding-left: 13px; // compensation of unkillable padding in mobile safari
     }
 
-    :host[data-tui-host-mode='onDark']._disabled & {
+    :host[data-mode='onDark']._disabled & {
         color: var(--tui-text-03-night);
     }
 }
@@ -166,43 +177,49 @@
 .placeholder {
     .textfield-placeholder();
     position: absolute;
-    top: 16px;
-    left: 16px;
     max-width: ~'calc(100% - 24px)';
 
     &_raised {
         max-width: ~'calc(113% - 32px)';
     }
 
+    :host[data-tui-host-size='m'] & {
+        top: 12px;
+        left: 12px;
+    }
+
+    :host[data-tui-host-size='l'] & {
+        top: 16px;
+        left: 16px;
+    }
+
     :host._has-tooltip & {
         max-width: ~'calc(100% - 52px)';
+    }
+
+    :host._label-outside & {
+        overflow: initial;
+        height: auto;
     }
 }
 
 .example-text {
     position: absolute;
-    top: 10px;
-    left: 12px;
     max-width: ~'calc(100% - 24px)';
     color: var(--tui-text-03);
     user-select: none;
 
-    :host._label-outside & {
-        top: 16px;
-        left: 16px;
-        color: var(--tui-text-03);
-    }
-
-    :host:not(._label-outside) & {
-        top: 25px;
-        left: 16px;
-        max-width: ~'calc(100% - 32px)';
-        color: var(--tui-text-02);
-    }
-
     :host._has-tooltip._focused &,
     :host._has-tooltip._has-value & {
         max-width: ~'calc(100% - 52px)';
+    }
+
+    :host[data-tui-host-size='m'] & {
+        left: 12px;
+    }
+
+    :host[data-tui-host-size='l'] & {
+        left: 16px;
     }
 }
 
@@ -213,7 +230,7 @@
 }
 
 .counter {
-    .text-body-s();
+    font: var(--tui-font-text-s);
     position: absolute;
     bottom: 8px;
     right: 12px;
@@ -222,7 +239,7 @@
     text-align: right;
     color: var(--tui-text-03);
 
-    :host[data-tui-host-mode='onDark'] & {
+    :host[data-mode='onDark'] & {
         color: var(--tui-text-03-night);
     }
 }

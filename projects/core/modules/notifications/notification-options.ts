@@ -3,7 +3,8 @@ import {TuiNotification} from '@taiga-ui/core/enums';
 export interface TuiNotificationOptions {
     readonly label?: string;
     readonly status?: TuiNotification;
-    readonly autoClose?: boolean;
+    readonly hasIcon?: boolean;
+    readonly autoClose?: boolean | number;
     readonly hasCloseButton?: boolean;
 }
 
